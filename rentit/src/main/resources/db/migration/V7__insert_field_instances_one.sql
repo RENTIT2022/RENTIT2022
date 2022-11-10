@@ -1,0 +1,35 @@
+INSERT INTO field(id, name) VALUES(2, 'Состояние');
+INSERT INTO field(id, name) VALUES(3, 'Пол');
+INSERT INTO field(id, name) VALUES(4, 'Цвет');
+INSERT INTO field(id, name) VALUES(5, 'Доставка');
+
+INSERT INTO field(id, name) VALUES(6, 'Модель');
+INSERT INTO field(id, name) VALUES(7, 'Пробег (км.)');
+INSERT INTO field(id, name) VALUES(8, 'Кузов');
+INSERT INTO field(id, name) VALUES(9, 'Топливо');
+INSERT INTO field(id, name) VALUES(10, 'Коробка передач');
+INSERT INTO field(id, name) VALUES(11, 'Объем двигателя');
+INSERT INTO field(id, name) VALUES(12, 'Руль');
+INSERT INTO field(id, name) VALUES(13, 'Привод');
+INSERT INTO field(id, name) VALUES(14, 'Техническое состояние');
+INSERT INTO field(id, name) VALUES(15, 'Растаможка');
+INSERT INTO field(id, name) VALUES(16, 'VIN код');
+
+INSERT INTO field(id, name) VALUES(17, 'Район');
+INSERT INTO field(id, name) VALUES(18, 'Количество комнат');
+INSERT INTO field(id, name) VALUES(19, 'Площадь (м2)');
+INSERT INTO field(id, name) VALUES(20, 'Этаж');
+INSERT INTO field(id, name) VALUES(21, 'Количество этажей');
+INSERT INTO field(id, name) VALUES(22, 'Серия');
+INSERT INTO field(id, name) VALUES(23, 'Площадь кухни (м2)');
+INSERT INTO field(id, name) VALUES(24, 'Правоустанавливающие документы');
+INSERT INTO field(id, name) VALUES(25, 'Отопление');
+INSERT INTO field(id, name) VALUES(26, 'Ремонт');
+INSERT INTO field(id, name) VALUES(27, 'Мебель');
+INSERT INTO field(id, name) VALUES(28, 'Материал стен');
+INSERT INTO field(id, name) VALUES(29, 'Год постройки');
+INSERT INTO field(id, name) VALUES(30, 'Окна (направленность)');
+INSERT INTO field(id, name) VALUES(31, 'Балкон, лоджия');
+INSERT INTO field(id, name) VALUES(32, 'Защита территории');
+INSERT INTO field(id, name) VALUES(33, 'Дополнительно');
+INSERT INTO field(id, name) VALUES(34, 'Тип предложения');

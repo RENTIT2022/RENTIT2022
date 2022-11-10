@@ -1,0 +1,39 @@
+insert into category_field (category_id, field_id, is_visible) values(1, 6, true);
+insert into category_field (category_id, field_id, is_visible) values(1, 7, true);
+insert into category_field (category_id, field_id, is_visible) values(1, 8, true);
+insert into category_field (category_id, field_id, is_visible) values(1, 9, true);
+insert into category_field (category_id, field_id, is_visible) values(1, 10, true);
+insert into category_field (category_id, field_id, is_visible) values(1, 11, true);
+insert into category_field (category_id, field_id, is_visible) values(1, 12, true);
+insert into category_field (category_id, field_id, is_visible) values(1, 13, true);
+insert into category_field (category_id, field_id, is_visible) values(1, 14, true);
+insert into category_field (category_id, field_id, is_visible) values(1, 15, true);
+insert into category_field (category_id, field_id, is_visible) values(1, 16, true);
+
+insert into category_field (category_id, field_id, is_visible) values(2, 17, true);
+insert into category_field (category_id, field_id, is_visible) values(2, 18, true);
+insert into category_field (category_id, field_id, is_visible) values(2, 19, true);
+insert into category_field (category_id, field_id, is_visible) values(2, 20, true);
+insert into category_field (category_id, field_id, is_visible) values(2, 21, true);
+insert into category_field (category_id, field_id, is_visible) values(2, 22, true);
+insert into category_field (category_id, field_id, is_visible) values(2, 23, true);
+insert into category_field (category_id, field_id, is_visible) values(2, 24, true);
+insert into category_field (category_id, field_id, is_visible) values(2, 25, true);
+insert into category_field (category_id, field_id, is_visible) values(2, 26, true);
+insert into category_field (category_id, field_id, is_visible) values(2, 27, true);
+insert into category_field (category_id, field_id, is_visible) values(2, 28, true);
+insert into category_field (category_id, field_id, is_visible) values(2, 29, true);
+insert into category_field (category_id, field_id, is_visible) values(2, 30, true);
+insert into category_field (category_id, field_id, is_visible) values(2, 31, true);
+insert into category_field (category_id, field_id, is_visible) values(2, 32, true);
+insert into category_field (category_id, field_id, is_visible) values(2, 33, true);
+insert into category_field (category_id, field_id, is_visible) values(2, 34, true);
+
+insert into category_field (category_id, field_id, is_visible) values(3, 2, true);
+insert into category_field (category_id, field_id, is_visible) values(3, 3, true);
+insert into category_field (category_id, field_id, is_visible) values(3, 4, true);
+insert into category_field (category_id, field_id, is_visible) values(3, 5, true);
+
+insert into category_field (category_id, field_id, is_visible) values(4, 2, true);
+insert into category_field (category_id, field_id, is_visible) values(4, 4, true);
+insert into category_field (category_id, field_id, is_visible) values(4, 5, true);

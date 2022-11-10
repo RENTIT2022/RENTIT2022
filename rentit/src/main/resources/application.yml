@@ -1,0 +1,36 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            clientId: 542421450257-nacj63pbadiopfl5omvpvdh78rdjleu2.apps.googleusercontent.com
+            clientSecret: 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
+            redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
+            scope:
+              - email
+              - profile
+          facebook:
+            clientId: 882256589825796
+            clientSecret: 276aab573abd7f78efdf27e5c7d2e483
+            redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
+            scope:
+              - email
+              - public_profile
+        provider:
+          facebook:
+            authorizationUri: https://www.facebook.com/v3.0/dialog/oauth
+            tokenUri: https://graph.facebook.com/v3.0/oauth/access_token
+            userInfoUri: https://graph.facebook.com/v3.0/me?fields=id,name,email,picture.width(250).height(250)
+app:
+  cors:
+    allowedOrigins: http://localhost:3000,http://localhost:8080
+  oauth2:
+    # After successfully authenticating with the OAuth2 Provider,
+    # we'll be generating an auth token for the user and sending the token to the
+    # redirectUri mentioned by the client in the /oauth2/authorize request.
+    # We're not using cookies because they won't work well in mobile clients.
+    authorizedRedirectUris:
+      - http://localhost:3000/oauth2/redirect
+      - myandroidapp://oauth2/redirect
+      - myiosapp://oauth2/redirect
