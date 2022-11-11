@@ -15,6 +15,8 @@ public class ProductMainPageDto {
 
     private int price;
 
+    private int clickNumber;
+
     private String mainImageUrl;
 
     private boolean isFavorite;

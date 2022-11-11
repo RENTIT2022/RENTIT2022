@@ -78,6 +78,7 @@ public class ProductService {
         dto.setProductId(product.getId());
         dto.setTitle(product.getTitle());
         dto.setPrice(product.getPrice());
+        dto.setClickNumber(product.getClickedNum());
         dto.setFavorite(getAuthentication().getFavorites().contains(product));
 
         List<ImageProduct> imageProductList = product.getImageProduct();
