@@ -83,12 +83,8 @@ public class ProductService {
 
         List<ImageProduct> imageProductList = product.getImageProduct();
 
-        for (ImageProduct imageProduct : imageProductList) {
-
-            if (imageProduct.getOrderNumber() == 0) {
-                dto.setMainImageUrl(imageProduct.getImage().getUrl());
-                break;
-            }
+        if(!imageProductList.isEmpty()) {
+            dto.setMainImageUrl(imageProductList.get(0).getImage().getUrl());
         }
 
         return dto;
