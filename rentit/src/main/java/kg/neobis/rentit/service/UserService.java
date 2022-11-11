@@ -194,6 +194,10 @@ public class UserService implements UserDetailsService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Could not find user by id = " + id));
 
+        if(multipartFiles.length != 3) {
+            throw new IllegalArgumentException("Должно быть 3 фотографии паспорта");
+        }
+
         List<ImageUser> imageUsers = user.getImageUser();
 
         for(int i = 1; i < imageUsers.size(); i++) {
