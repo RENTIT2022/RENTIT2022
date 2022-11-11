@@ -88,7 +88,7 @@ public class ImageService {
     }
 
     @SneakyThrows
-    public Image replaceImage(MultipartFile file, Image image) {
+    public Image replaceProductImage(MultipartFile file, Image image) {
         File saveFile = Files.createTempFile(
                         System.currentTimeMillis() + "",
                         Objects.requireNonNull

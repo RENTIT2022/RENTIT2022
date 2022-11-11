@@ -29,7 +29,7 @@ public class ProductDetailsDto {
 
     private Location location;
 
-    private List<String> images;
+    private List<ProductImageDto> images;
 
     private TreeMap<String, String> characteristics;
 

@@ -23,17 +23,28 @@ public class ProductController {
     private final ProductService productService;
 
 
-    @PostMapping("/publish")
-    public ResponseEntity<ProductRegistrationDto> publishProduct(@RequestPart ProductRegistrationDto dto,
-                                                                 @RequestPart MultipartFile[] multipartFiles) {
-        return ResponseEntity.ok(productService.publishProduct(dto, multipartFiles));
+    @PostMapping("/publish/details")
+    public ResponseEntity<ProductRegistrationDto> publishProductDetails(@RequestBody ProductRegistrationDto dto) {
+        return ResponseEntity.ok(productService.publishProductDetails(dto));
     }
 
-    @PutMapping("/update/{productId}")
-    public ResponseEntity<ProductRegistrationDto> updateProduct(@PathVariable Long productId,
-                                                                @RequestPart ProductRegistrationDto dto,
-                                                                @RequestPart MultipartFile[] multipartFiles) {
-        return ResponseEntity.ok(productService.updateProduct(productId, dto, multipartFiles));
+    @PostMapping("/publish/image/{productId}/{order}")
+    public ResponseEntity<String> publishProductImage(@RequestPart MultipartFile file,
+                                                      @PathVariable Long productId,
+                                                      @PathVariable byte order) {
+        return ResponseEntity.ok(productService.publishProductImage(file, productId, order));
+    }
+
+    @PutMapping("/update/details/{productId}")
+    public ResponseEntity<ProductRegistrationDto> updateProductDetails(@PathVariable Long productId,
+                                                                @RequestBody ProductRegistrationDto dto) {
+        return ResponseEntity.ok(productService.updateProductDetails(productId, dto));
+    }
+
+    @PutMapping("/update/image-replace/{imageId}")
+    public ResponseEntity<String> updateProductReplaceImage(@RequestPart MultipartFile file,
+                                                            @PathVariable Long imageId) {
+        return ResponseEntity.ok(productService.updateProductReplaceImage(file, imageId));
     }
 
     @PutMapping("/activate/{productId}")

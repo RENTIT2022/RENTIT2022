@@ -11,4 +11,6 @@ public interface ImageProductRepository extends JpaRepository<ImageProduct, Long
 
     List<ImageProduct> findByProductIdOrderByOrderNumberAsc(Long productId);
 
+    ImageProduct findByProductIdAndOrderNumber(Long productId, byte orderNumber);
+
 }
