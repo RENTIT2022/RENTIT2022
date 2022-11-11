@@ -61,6 +61,21 @@ public class UserController {
     }
 
     @PreAuthorize("hasAuthority('ROLE_USER')")
+    @Operation(summary = "User registration complete separately parameter")
+    @PutMapping(value = "/sign-up-complete-parameter", produces = "application/json")
+    public ResponseEntity<UserDto> registerUserComplete(@Valid @RequestBody UserCompleteRegisterDto userCompleteRegisterDto) {
+        return new ResponseEntity<>(userService.registerUserCompleteParameter(userCompleteRegisterDto), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    @Operation(summary = "User registration complete separately files")
+    @PutMapping(value = "/sign-up-complete-files/{id}", produces = "application/json")
+    public ResponseEntity<UserDto> registerUserComplete(@PathVariable Long id,
+                                                        @RequestPart MultipartFile[] multipartFiles) {
+        return new ResponseEntity<>(userService.registerUserCompleteFiles(id, multipartFiles), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     @Operation(summary = "User registration complete")
     @PutMapping(value = "/sign-up-complete", produces = "application/json")
     public ResponseEntity<UserDto> registerUserComplete(@Valid @RequestPart UserCompleteRegisterDto userCompleteRegisterDto,
@@ -73,5 +88,12 @@ public class UserController {
     @PutMapping(value = "/update-password", produces = "application/json")
     public ResponseEntity<MessageResponse> updateUserPassword(@Valid @RequestBody ChangePasswordDto changePasswordDTO) {
         return ResponseEntity.ok(userService.updatePassword(changePasswordDTO));
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_TECH_SUPPORT') or hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Delete user by id")
+    @DeleteMapping(value = "/{id}", produces = "application/json")
+    public ResponseEntity<MessageResponse> deleteUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.deleteUserById(id));
     }
 }

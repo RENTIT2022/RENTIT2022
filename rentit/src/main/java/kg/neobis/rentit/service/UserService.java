@@ -157,6 +157,61 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
+    public UserDto registerUserCompleteParameter(UserCompleteRegisterDto userCompleteRegisterDto) {
+        User user = userRepository.findById(userCompleteRegisterDto.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Could not find user by id = " + userCompleteRegisterDto.getId()));
+
+        try {
+            long tin = Long.parseLong(userCompleteRegisterDto.getPassportData().getTin());
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Неверный ИНН!");
+        }
+
+        if(userRepository.existsByPassportDataTin(userCompleteRegisterDto.getPassportData().getTin())) {
+            throw new AlreadyExistException("Пользователь с таким ИНН: " + userCompleteRegisterDto.getPassportData().getTin() + " уже существует");
+        }
+
+        if(!PhoneNumberValidator.isPhoneNumberValid(userCompleteRegisterDto.getPhoneNumber())) {
+            throw new IllegalArgumentException("Номер телефона - " + userCompleteRegisterDto.getPhoneNumber() + " неверный");
+        }
+
+        user.setFirstName(userCompleteRegisterDto.getFirstName());
+        user.setLastName(userCompleteRegisterDto.getLastName());
+        user.setPhoneNumber(userCompleteRegisterDto.getPhoneNumber());
+        user.setDateOfBirth(userCompleteRegisterDto.getDateOfBirth());
+        user.setPassportData(PassportDataMapper
+                .passportDataDtoToPassportData(userCompleteRegisterDto.getPassportData()));
+        user.setRegisteredAddress(RegisteredAddressMapper
+                .registeredAddressDtoToRegisteredAddress(userCompleteRegisterDto.getRegisteredAddress()));
+        user.setResidenceAddress(ResidenceAddressMapper
+                .residenceAddressDtoToResidenceAddress(userCompleteRegisterDto.getResidenceAddress()));
+
+        return UserMapper.userToUserDto(userRepository.save(user));
+    }
+
+    @Transactional
+    public UserDto registerUserCompleteFiles(Long id, MultipartFile[] multipartFiles) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Could not find user by id = " + id));
+
+        List<ImageUser> imageUsers = user.getImageUser();
+
+        for(int i = 1; i < imageUsers.size(); i++) {
+            if(!multipartFiles[i - 1].isEmpty()) {
+                imageUsers.get(i).setImage(imageService
+                        .replaceImage(imageUsers.get(i).getImage().getId(),
+                                multipartFiles[i - 1])
+                );
+            }
+        }
+
+        user.setRegistrationComplete(true);
+        user.setImageUser(imageUsers);
+
+        return UserMapper.userToUserDto(userRepository.save(user));
+    }
+
+    @Transactional
     public UserDto registerUserComplete(UserCompleteRegisterDto userCompleteRegisterDto, MultipartFile[] multipartFiles) {
         User user = userRepository.findById(userCompleteRegisterDto.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Could not find user by id = " + userCompleteRegisterDto.getId()));
@@ -349,4 +404,12 @@ public class UserService implements UserDetailsService {
         return SecurityContextHolder.getContext().getAuthentication();
     }
 
+    public MessageResponse deleteUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Could not find user by id: " + id));
+
+        userRepository.delete(user);
+
+        return new MessageResponse("User successfully deleted with id: " + id);
+    }
 }
