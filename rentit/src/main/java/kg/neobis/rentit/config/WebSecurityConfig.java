@@ -76,7 +76,8 @@ public class WebSecurityConfig {
                 .authorizeRequests()
                 .antMatchers("/products/get/main-page/**",
                         "/products/get/main-page-by-category/**",
-                        "/products/get/search/**")
+                        "/products/get/search/**",
+                        "/categories/**")
                 .permitAll()
                 .antMatchers("/",
                         "/error",
