@@ -91,7 +91,7 @@ public class ProductService {
         dto.setTitle(product.getTitle());
         dto.setPrice(product.getPrice());
         dto.setClickNumber(product.getClickedNum());
-        dto.setFavorite(getAuthentication().getFavorites().contains(product));
+        dto.setFavorite(getAuthentication() == null || getFavorites().contains(product));
         dto.setActive(product.getActive());
 
         List<ImageProduct> imageProductList =

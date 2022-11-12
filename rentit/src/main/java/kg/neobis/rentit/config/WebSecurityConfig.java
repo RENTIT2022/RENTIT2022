@@ -74,11 +74,6 @@ public class WebSecurityConfig {
                 .accessDeniedHandler(accessDeniedHandler)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/products/get/main-page/**",
-                        "/products/get/main-page-by-category/**",
-                        "/products/get/search/**",
-                        "/categories/**")
-                .permitAll()
                 .antMatchers("/",
                         "/error",
                         "/favicon.ico",
@@ -91,7 +86,11 @@ public class WebSecurityConfig {
                         "/**/*.js")
                 .permitAll()
                 .antMatchers("/api/auth/**", "/api/v1/send-reset-code",
-                        "/api/v1/check-reset-code", "/oauth2/**", "/swagger-ui/**")
+                        "/api/v1/check-reset-code", "/oauth2/**", "/swagger-ui/**",
+                        "/products/get/main-page/**",
+                        "/products/get/main-page-by-category/**",
+                        "/products/get/search/**",
+                        "/categories/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
