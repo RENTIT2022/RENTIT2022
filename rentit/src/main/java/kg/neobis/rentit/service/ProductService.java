@@ -98,7 +98,7 @@ public class ProductService {
                 imageProductRepository.findByProductIdOrderByOrderNumberAsc(product.getId());
 
         if(!imageProductList.isEmpty()) {
-            dto.setMainImageUrl(imageProductList.get(0).getImage().getUrl());
+            dto.setMainImageUrl(imageProductList.get(0).getImage().getUrl().replace("http", "https"));
         }
 
         return dto;
@@ -127,7 +127,7 @@ public class ProductService {
                     ProductImageDto productImageDto = new ProductImageDto();
 
                     productImageDto.setImageId(e.getImage().getId());
-                    productImageDto.setImageUrl(e.getImage().getUrl());
+                    productImageDto.setImageUrl(e.getImage().getUrl().replace("http", "https"));
                     productImageDto.setOrderNumber(e.getOrderNumber());
 
                     return productImageDto;
