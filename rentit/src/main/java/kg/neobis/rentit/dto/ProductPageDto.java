@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductMainPageDto {
+public class ProductPageDto {
 
     private Long productId;
 
@@ -20,5 +20,7 @@ public class ProductMainPageDto {
     private String mainImageUrl;
 
     private boolean isFavorite;
+
+    private boolean isActive;
 
 }

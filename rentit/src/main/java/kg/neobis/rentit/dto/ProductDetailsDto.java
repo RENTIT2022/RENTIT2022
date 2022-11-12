@@ -25,6 +25,8 @@ public class ProductDetailsDto {
 
     private boolean isFavorite;
 
+    private boolean isActive;
+
     private int minimumBookingNumberDay;
 
     private Location location;

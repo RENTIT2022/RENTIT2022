@@ -2,7 +2,7 @@ package kg.neobis.rentit.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kg.neobis.rentit.dto.ProductDetailsDto;
-import kg.neobis.rentit.dto.ProductMainPageDto;
+import kg.neobis.rentit.dto.ProductPageDto;
 import kg.neobis.rentit.dto.ProductRegistrationDto;
 import kg.neobis.rentit.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -67,19 +67,24 @@ public class ProductController {
         return ResponseEntity.ok(productService.deleteProductFromFavorites(productId));
     }
 
+    @GetMapping("/get/user-products")
+    public ResponseEntity<List<ProductPageDto>> getUserProducts() {
+        return ResponseEntity.ok(productService.getUserProducts());
+    }
+
     @GetMapping("/get/search/{text}")
-    public ResponseEntity<List<ProductMainPageDto>> getProductBySearch(@PathVariable String text) {
+    public ResponseEntity<List<ProductPageDto>> getProductBySearch(@PathVariable String text) {
         return ResponseEntity.ok(productService.getProductBySearch(text));
     }
 
     @GetMapping("/get/main-page/{callNumber}")
-    public ResponseEntity<List<ProductMainPageDto>> getMainPageProducts(@PathVariable int callNumber) {
+    public ResponseEntity<List<ProductPageDto>> getMainPageProducts(@PathVariable int callNumber) {
         return ResponseEntity.ok(productService.getMainPageProducts(callNumber));
     }
 
     @GetMapping("/get/main-page-by-category/{callNumber}/{categoryId}")
-    public ResponseEntity<List<ProductMainPageDto>> getMainPageProductsByCategory(@PathVariable int callNumber,
-                                                                                  @PathVariable Long categoryId) {
+    public ResponseEntity<List<ProductPageDto>> getMainPageProductsByCategory(@PathVariable int callNumber,
+                                                                              @PathVariable Long categoryId) {
         return ResponseEntity.ok(productService.getMainPageProductsByCategory(callNumber, categoryId));
     }
 
@@ -89,12 +94,12 @@ public class ProductController {
     }
 
     @GetMapping("/get/recommendations")
-    public ResponseEntity<List<ProductMainPageDto>> getRecommendations() {
+    public ResponseEntity<List<ProductPageDto>> getRecommendations() {
         return ResponseEntity.ok(productService.getRecommendations());
     }
 
     @GetMapping("/get/favorites")
-    public ResponseEntity<List<ProductMainPageDto>> getFavorites() {
+    public ResponseEntity<List<ProductPageDto>> getFavorites() {
         return ResponseEntity.ok(productService.getFavorites());
     }
 

@@ -159,6 +159,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
     }
 
+    @ExceptionHandler(ProductViolationException.class)
+    public ResponseEntity<Object> handleProductViolationException(
+            ProductViolationException ex) {
+
+        List<String> details = new ArrayList<String>();
+        details.add(ex.getMessage());
+
+        ApiError err = ApiError.builder()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .timestamp(LocalDateTime.now())
+                .message("Продукт не принадлежит вам.")
+                .errors(details)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
+    }
+
     @ExceptionHandler(FileEmptyException.class)
     public ResponseEntity<Object> handleFileEmptyException(
             FileEmptyException ex) {

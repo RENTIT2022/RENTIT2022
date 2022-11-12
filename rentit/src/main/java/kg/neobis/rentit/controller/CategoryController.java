@@ -1,6 +1,7 @@
 package kg.neobis.rentit.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kg.neobis.rentit.dto.CategoryFieldsDto;
 import kg.neobis.rentit.dto.CategoryNameDto;
 import kg.neobis.rentit.service.CategoryService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,11 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
+
+    @GetMapping("/get/category-fields")
+    public ResponseEntity<List<CategoryFieldsDto>> getCategoryFields() {
+        return ResponseEntity.ok(categoryService.getCategoryFields());
+    }
 
     @GetMapping("/get/name-id")
     public ResponseEntity<List<CategoryNameDto>> getCategoryNames() {

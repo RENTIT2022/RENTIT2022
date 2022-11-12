@@ -4,6 +4,7 @@ import kg.neobis.rentit.dto.*;
 import kg.neobis.rentit.entity.*;
 import kg.neobis.rentit.exception.AlreadyExistException;
 import kg.neobis.rentit.exception.BadRequestException;
+import kg.neobis.rentit.exception.ProductViolationException;
 import kg.neobis.rentit.exception.ResourceNotFoundException;
 import kg.neobis.rentit.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -42,22 +43,24 @@ public class ProductService {
     private final ViewRepository viewRepository;
 
 
-    public List<ProductMainPageDto> getProductBySearch(String text) {
+    public List<ProductPageDto> getProductBySearch(String text) {
         return productRepository.getProductBySearch(text).stream()
-                .map(this::mapToProductMainPageDto)
+                .filter(Product::getActive)
+                .map(this::mapToProductPageDto)
                 .collect(Collectors.toList());
     }
 
-    public List<ProductMainPageDto> getMainPageProducts(int callNumber) {
+    public List<ProductPageDto> getMainPageProducts(int callNumber) {
         return productRepository.getMainPageProducts(callNumber * 20)
                 .stream()
+                .filter(Product::getActive)
                 .map(
-                        this::mapToProductMainPageDto
+                        this::mapToProductPageDto
                 )
                 .collect(Collectors.toList());
     }
 
-    public List<ProductMainPageDto> getMainPageProductsByCategory(int callNumber, Long categoryId) {
+    public List<ProductPageDto> getMainPageProductsByCategory(int callNumber, Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(
                         () -> new ResourceNotFoundException("Category was not found with ID: "
@@ -66,22 +69,33 @@ public class ProductService {
 
         return productRepository.getMainPageProductsByCategory(callNumber * 20, category.getId())
                 .stream()
+                .filter(Product::getActive)
                 .map(
-                        this::mapToProductMainPageDto
+                        this::mapToProductPageDto
                 )
                 .collect(Collectors.toList());
     }
 
-    private ProductMainPageDto mapToProductMainPageDto(Product product) {
-        ProductMainPageDto dto = new ProductMainPageDto();
+    public List<ProductPageDto> getUserProducts() {
+        return getAuthentication().getProducts().stream()
+                .map(
+                        this::mapToProductPageDto
+                )
+                .collect(Collectors.toList());
+    }
+
+    private ProductPageDto mapToProductPageDto(Product product) {
+        ProductPageDto dto = new ProductPageDto();
 
         dto.setProductId(product.getId());
         dto.setTitle(product.getTitle());
         dto.setPrice(product.getPrice());
         dto.setClickNumber(product.getClickedNum());
         dto.setFavorite(getAuthentication().getFavorites().contains(product));
+        dto.setActive(product.getActive());
 
-        List<ImageProduct> imageProductList = product.getImageProduct();
+        List<ImageProduct> imageProductList =
+                imageProductRepository.findByProductIdOrderByOrderNumberAsc(product.getId());
 
         if(!imageProductList.isEmpty()) {
             dto.setMainImageUrl(imageProductList.get(0).getImage().getUrl());
@@ -106,6 +120,7 @@ public class ProductService {
         dto.setClickNumber(product.getClickedNum());
         dto.setFavorite(getAuthentication().getFavorites().contains(product));
         dto.setMinimumBookingNumberDay(product.getMinimumBookingNumberDay());
+        dto.setActive(product.getActive());
 
         dto.setImages(imageProductRepository.findByProductIdOrderByOrderNumberAsc(productId).stream()
                 .map(e -> {
@@ -171,7 +186,7 @@ public class ProductService {
         return dto;
     }
 
-    public List<ProductMainPageDto> getRecommendations() {
+    public List<ProductPageDto> getRecommendations() {
         List<View> views = viewRepository.findAllByUserId(getAuthentication().getId());
 
         List<Long> categories = new ArrayList<>();
@@ -192,18 +207,20 @@ public class ProductService {
 
         if (categories.isEmpty()) {
             return productRepository.getRandomProducts().stream()
-                    .map(this::mapToProductMainPageDto)
+                    .filter(Product::getActive)
+                    .map(this::mapToProductPageDto)
                     .collect(Collectors.toList());
         }
 
         return productRepository.getRandomProductsByCategory(categories).stream()
-                .map(this::mapToProductMainPageDto)
+                .filter(Product::getActive)
+                .map(this::mapToProductPageDto)
                 .collect(Collectors.toList());
     }
 
-    public List<ProductMainPageDto> getFavorites() {
+    public List<ProductPageDto> getFavorites() {
         return getAuthentication().getFavorites().stream()
-                .map(this::mapToProductMainPageDto)
+                .map(this::mapToProductPageDto)
                 .collect(Collectors.toList());
     }
 
@@ -292,6 +309,10 @@ public class ProductService {
                                 + productId)
                 );
 
+        if(!getAuthentication().getProducts().contains(product)) {
+            throw new ProductViolationException("Product violation.");
+        }
+
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(
                         () -> new ResourceNotFoundException("Category was not found with ID: "
@@ -378,9 +399,17 @@ public class ProductService {
                                 + productId)
                 );
 
+        if(!getAuthentication().getProducts().contains(product)) {
+            throw new ProductViolationException("Product violation.");
+        } else if(product.getActive()) {
+            return "The product is already activated.";
+        }
+
         product.setActive(true);
 
-        return "The product activated.";
+        productRepository.save(product);
+
+        return "The product is activated.";
     }
 
     public String deactivateProduct(Long productId) {
@@ -390,9 +419,17 @@ public class ProductService {
                                 + productId)
                 );
 
+        if(!getAuthentication().getProducts().contains(product)) {
+            throw new ProductViolationException("Product violation.");
+        } else if(!product.getActive()) {
+            return "The product is already deactivated.";
+        }
+
         product.setActive(false);
 
-        return "The product deactivated.";
+        productRepository.save(product);
+
+        return "The product is deactivated.";
     }
 
     public String addProductToFavorites(Long productId) {
