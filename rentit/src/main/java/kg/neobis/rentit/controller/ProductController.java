@@ -103,4 +103,9 @@ public class ProductController {
         return ResponseEntity.ok(productService.getFavorites());
     }
 
+    @DeleteMapping("/delete/{productId}")
+    public ResponseEntity<String> deleteProduct(@PathVariable Long productId) {
+        return ResponseEntity.ok(productService.deleteProduct(productId));
+    }
+
 }

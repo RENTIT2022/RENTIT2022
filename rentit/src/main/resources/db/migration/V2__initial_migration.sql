@@ -1,5 +1,6 @@
 create table acc_owner_follower (acc_owner int8 not null, follower int8 not null);
 create table "booking" (id int8 not null, booking_date_time timestamp, booking_status int4, date_from date, date_till date, total_price int4, product_id int8, user_id int8, primary key (id));
+create table "booking_calendar" (id int8 not null, booked boolean not null, date date, product_id int8, user_id int8, primary key (id));
 create table "category" (id int8 not null, name varchar(255), primary key (id));
 create table "category_field" (category_id int8 not null, field_id int8 not null, is_visible boolean not null, primary key (category_id, field_id));
 create table "field" (id int8 not null, name varchar(255), primary key (id));
@@ -28,6 +29,7 @@ alter table if exists "role" drop constraint if exists UK_8sewwnpamngi6b1dwaa88a
 alter table if exists "role" add constraint UK_8sewwnpamngi6b1dwaa88askk unique (name);
 
 create sequence booking_seq start 1 increment 1;
+create sequence calendar_seq start 1 increment 1;
 create sequence category_seq start 1 increment 1;
 create sequence field_seq start 1 increment 1;
 create sequence image_product_seq start 1 increment 1;
@@ -50,6 +52,8 @@ alter table if exists acc_owner_follower add constraint FKnc0bv6i9q2617ff05blf41
 alter table if exists acc_owner_follower add constraint FKh0817vvp2ucqvwp3sb042p8kd foreign key (acc_owner) references "user";
 alter table if exists "booking" add constraint FKo26c6t5ukm9k5flg1lbbmjb7t foreign key (product_id) references "product";
 alter table if exists "booking" add constraint FK7d7kgstrv4tyx63ugpnwrgrr2 foreign key (user_id) references "user";
+alter table if exists "booking_calendar" add constraint FK4xonx2t5wq5v13ix2jjpfprar foreign key (product_id) references "product";
+alter table if exists "booking_calendar" add constraint FK4pci9dxh9yy1etth75m476sy8 foreign key (user_id) references "user";
 alter table if exists "category_field" add constraint FKhw8ho4fxc6ckogid28w3dot4x foreign key (category_id) references "category";
 alter table if exists "category_field" add constraint FKfuwk6i8tubvcg2h0t2nlt91fu foreign key (field_id) references "field";
 alter table if exists "field_product" add constraint FKetxwjfge0j4ertqouql0in6qe foreign key (field_id) references "field";

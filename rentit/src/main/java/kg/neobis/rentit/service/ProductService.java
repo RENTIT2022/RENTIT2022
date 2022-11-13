@@ -2,6 +2,7 @@ package kg.neobis.rentit.service;
 
 import kg.neobis.rentit.dto.*;
 import kg.neobis.rentit.entity.*;
+import kg.neobis.rentit.entity.Calendar;
 import kg.neobis.rentit.exception.AlreadyExistException;
 import kg.neobis.rentit.exception.BadRequestException;
 import kg.neobis.rentit.exception.ProductViolationException;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,6 +43,10 @@ public class ProductService {
     private final CategoryFieldRepository categoryFieldRepository;
 
     private final ViewRepository viewRepository;
+
+    private final CalendarRepository calendarRepository;
+
+    private final BookingRepository bookingRepository;
 
 
     public List<ProductPageDto> getProductBySearch(String text) {
@@ -97,7 +103,7 @@ public class ProductService {
         List<ImageProduct> imageProductList =
                 imageProductRepository.findByProductIdOrderByOrderNumberAsc(product.getId());
 
-        if(!imageProductList.isEmpty()) {
+        if (!imageProductList.isEmpty()) {
             dto.setMainImageUrl(imageProductList.get(0).getImage().getUrl().replace("http", "https"));
         }
 
@@ -260,7 +266,24 @@ public class ProductService {
                 .active(true)
                 .build();
 
+
         productRepository.save(product);
+
+        LocalDate bookFrom = product.getBookDateFrom();
+        LocalDate bookTill = product.getBookDateTill();
+
+        while (bookFrom.isBefore(bookTill.plusDays(1))) {
+            Calendar calendar = new Calendar();
+
+            calendar.setDate(bookFrom);
+            calendar.setProduct(product);
+            calendar.setBooked(false);
+            calendar.setUser(null);
+
+            calendarRepository.save(calendar);
+
+            bookFrom = bookFrom.plusDays(1);
+        }
 
         saveFieldProductValues(
                 categoryFieldRepository.findByCategoryIdOrderByFieldName(category.getId()), product, dto.getFieldValue()
@@ -309,7 +332,7 @@ public class ProductService {
                                 + productId)
                 );
 
-        if(!getAuthentication().getProducts().contains(product)) {
+        if (!getAuthentication().getProducts().contains(product)) {
             throw new ProductViolationException("Product violation.");
         }
 
@@ -399,9 +422,9 @@ public class ProductService {
                                 + productId)
                 );
 
-        if(!getAuthentication().getProducts().contains(product)) {
+        if (!getAuthentication().getProducts().contains(product)) {
             throw new ProductViolationException("Product violation.");
-        } else if(product.getActive()) {
+        } else if (product.getActive()) {
             return "The product is already activated.";
         }
 
@@ -419,9 +442,9 @@ public class ProductService {
                                 + productId)
                 );
 
-        if(!getAuthentication().getProducts().contains(product)) {
+        if (!getAuthentication().getProducts().contains(product)) {
             throw new ProductViolationException("Product violation.");
-        } else if(!product.getActive()) {
+        } else if (!product.getActive()) {
             return "The product is already deactivated.";
         }
 
@@ -470,6 +493,24 @@ public class ProductService {
         userRepository.save(user);
 
         return "The product was removed from favorites.";
+    }
+
+    public String deleteProduct(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Product was not found with ID: " + productId)
+                );
+
+        Booking bookings = bookingRepository.getBookingsByProductIdAndDate(productId, LocalDate.now());
+
+        if (bookings != null) {
+            throw new BadRequestException("Вы не можете удалить продукт, так как есть активные бронирования, " +
+                    "которые все еще действительны");
+        }
+
+        productRepository.delete(product);
+
+        return "Product was deleted successfully";
     }
 
     public User getAuthentication() {

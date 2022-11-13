@@ -15,6 +15,8 @@ public class BookingRequestDto {
 
     private Long clientId;
 
+    private String clientName;
+
     private String productTitle;
 
     private String mainImageUrl;

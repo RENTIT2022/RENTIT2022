@@ -60,17 +60,13 @@ public class Product {
     )
     private Location location;
 
-    @ManyToOne(
-            cascade = CascadeType.ALL
-    )
+    @ManyToOne
     @JoinColumn(
             name = "user_id"
     )
     private User user;
 
-    @ManyToOne(
-            cascade = CascadeType.ALL
-    )
+    @ManyToOne
     @JoinColumn(
             name = "category_id"
     )
@@ -95,8 +91,15 @@ public class Product {
     private List<Booking> bookings;
 
     @OneToMany(
+            cascade = CascadeType.ALL,
             mappedBy = "product"
     )
     private List<Review> reviews;
+
+    @OneToMany(
+            cascade = CascadeType.ALL,
+            mappedBy = "product"
+    )
+    private List<Calendar> calendars;
 
 }

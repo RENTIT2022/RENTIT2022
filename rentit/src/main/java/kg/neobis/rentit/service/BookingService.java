@@ -4,6 +4,7 @@ import kg.neobis.rentit.dto.BookingRegistrationDto;
 import kg.neobis.rentit.dto.BookingRequestDto;
 import kg.neobis.rentit.dto.UserBookingDto;
 import kg.neobis.rentit.entity.Booking;
+import kg.neobis.rentit.entity.Calendar;
 import kg.neobis.rentit.entity.ImageProduct;
 import kg.neobis.rentit.entity.Product;
 import kg.neobis.rentit.entity.User;
@@ -12,6 +13,7 @@ import kg.neobis.rentit.exception.AlreadyExistException;
 import kg.neobis.rentit.exception.BadRequestException;
 import kg.neobis.rentit.exception.ResourceNotFoundException;
 import kg.neobis.rentit.repository.BookingRepository;
+import kg.neobis.rentit.repository.CalendarRepository;
 import kg.neobis.rentit.repository.ProductRepository;
 import kg.neobis.rentit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,8 @@ public class BookingService {
     private final ProductRepository productRepository;
 
     private final BookingRepository bookingRepository;
+
+    private final CalendarRepository calendarRepository;
 
 
     public List<UserBookingDto> getUserBookings() {
@@ -83,6 +87,7 @@ public class BookingService {
 
                     dto.setBookingId(entity.getId());
                     dto.setClientId(entity.getUser().getId());
+                    dto.setClientName(entity.getUser().getLastName() + " " + entity.getUser().getFirstName());
                     dto.setPrice(entity.getProduct().getPrice());
                     dto.setProductTitle(entity.getProduct().getTitle());
                     dto.setProductId(entity.getProduct().getId());
@@ -109,11 +114,13 @@ public class BookingService {
         for (Booking entity : bookingRepository.findAll()) {
             LocalDate efrom = entity.getDateFrom();
             LocalDate etill = entity.getDateTill();
-            if((from.compareTo(efrom) >= 0 && from.compareTo(etill) < 0) ||
-                    (from.compareTo(efrom) > 0 && from.compareTo(etill) <= 0) ||
-                    (till.compareTo(efrom) >= 0 && till.compareTo(etill) < 0) ||
-                    (till.compareTo(efrom) > 0 && till.compareTo(etill) <= 0)) {
-                throw new AlreadyExistException("The given dates are already booked.");
+            if(entity.getBookingStatus().equals(BookingStatus.ACCEPTED)) {
+                if ((from.compareTo(efrom) >= 0 && from.compareTo(etill) < 0) ||
+                        (from.compareTo(efrom) > 0 && from.compareTo(etill) <= 0) ||
+                        (till.compareTo(efrom) >= 0 && till.compareTo(etill) < 0) ||
+                        (till.compareTo(efrom) > 0 && till.compareTo(etill) <= 0)) {
+                    throw new AlreadyExistException("The given dates are already booked.");
+                }
             }
         }
 
@@ -148,54 +155,45 @@ public class BookingService {
     }
 
     public Map<String, List<Integer>> getProductSchedule(Long productId, int year, int month) {
-        List<Booking> bookings = bookingRepository.findAllByProductIdOrderByDateFrom(productId);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Product was not found with ID: " + productId)
+                );
 
-        Map<String, List<Integer>> monthSchedule = new HashMap<>();
+        List<Calendar> calendar = calendarRepository
+                .getCalendarByProductIdAndYearAndMonth(productId, year, month);
 
-        for (int i = 1; i <= YearMonth.of(year, month).lengthOfMonth(); i++) {
-            LocalDate today = LocalDate.now();
+        int days = YearMonth.of(year, month).lengthOfMonth();
 
-            LocalDate date = LocalDate.of(year, month, i);
+        int[] results = new int[days + 1];
 
-            if (today.compareTo(date) >= 0) {
+        for(Calendar entity: calendar) {
+            int d = entity.getDate().getDayOfMonth();
 
-                boolean added = false;
-
-                for (Booking booking : bookings) {
-                    LocalDate from = booking.getDateFrom();
-                    LocalDate till = booking.getDateTill();
-
-                    if ((date.compareTo(from) >= 0 && date.compareTo(till) < 0) ||
-                            (date.compareTo(from) > 0 && date.compareTo(till) <= 0)) {
-                        if (monthSchedule.containsKey("booked")) {
-                            monthSchedule.get("booked").add(i);
-                        } else {
-                            List<Integer> list = new ArrayList<>();
-
-                            list.add(i);
-
-                            monthSchedule.put("booked", list);
-                        }
-                        added = true;
-
-                        break;
-                    }
-                }
-                if (!added) {
-                    if (monthSchedule.containsKey("free")) {
-                        monthSchedule.get("free").add(i);
-                    } else {
-                        List<Integer> list = new ArrayList<>();
-
-                        list.add(i);
-
-                        monthSchedule.put("free", list);
-                    }
-                }
+            if(entity.isBooked()) {
+                results[d] = 1;
+            } else if(!entity.isBooked()) {
+                results[d] = -1;
             }
         }
 
-        return monthSchedule;
+        Map<String, List<Integer>> schedule = new HashMap<>();
+
+        schedule.put("booked", new ArrayList<>());
+        schedule.put("free", new ArrayList<>());
+        schedule.put("no booking", new ArrayList<>());
+
+        for(int i = 1; i < results.length; i++) {
+            if(results[i] == 1) {
+                schedule.get("booked").add(i);
+            } else if(results[i] == -1) {
+                schedule.get("free").add(i);
+            } else {
+                schedule.get("no booking").add(i);
+            }
+        }
+
+        return schedule;
     }
 
     public String cancelBooking(Long bookingId) {
@@ -218,6 +216,18 @@ public class BookingService {
         booking.setBookingStatus(BookingStatus.ACCEPTED);
 
         bookingRepository.save(booking);
+
+        List<Calendar> calendar = booking.getProduct().getCalendars();
+
+        for(Calendar entity: calendar) {
+            if((entity.getDate().isEqual(booking.getDateFrom()) ||
+            entity.getDate().isEqual(booking.getDateTill())) ||
+            entity.getDate().isAfter(booking.getDateFrom()) && entity.getDate().isBefore(booking.getDateTill())) {
+                entity.setBooked(true);
+                entity.setUser(booking.getUser());
+            }
+            calendarRepository.save(entity);
+        }
 
         return "The booking was accepted.";
     }
