@@ -13,6 +13,6 @@ public class UpdateReviewDto {
 
     private String text;
 
-    private byte star;
+    private int star;
 
 }

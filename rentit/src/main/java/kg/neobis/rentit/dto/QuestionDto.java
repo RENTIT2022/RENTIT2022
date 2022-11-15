@@ -4,16 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddReviewDto {
+public class QuestionDto {
 
-    private Long productId;
+    private Long id;
 
-    private String text;
+    private String question;
 
-    private int star;
+    private String answer;
 
 }

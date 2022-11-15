@@ -22,10 +22,21 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             value = "SELECT * FROM Booking " +
                     "WHERE product_id = :productId " +
                     "AND date_till > :date " +
+                    "AND booking_status = 'ACCEPTED'" +
                     "LIMIT 1",
             nativeQuery = true
     )
     Booking getBookingsByProductIdAndDate(Long productId, LocalDate date);
+
+    @Query(
+            value = "SELECT * FROM Booking " +
+                    "WHERE product_id = :productId " +
+                    "AND date_till < :date " +
+                    "AND booking_status = 'ACCEPTED'" +
+                    "LIMIT 1",
+            nativeQuery = true
+    )
+    Booking checkUpdateDateTill(Long productId, LocalDate date);
 
     List<Booking> findAllByProductIdOrderByDateFrom(Long productId);
 

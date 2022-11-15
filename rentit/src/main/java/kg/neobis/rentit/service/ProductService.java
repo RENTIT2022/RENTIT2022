@@ -51,7 +51,7 @@ public class ProductService {
 
     public List<ProductPageDto> getProductBySearch(String text) {
         return productRepository.getProductBySearch(text).stream()
-                .filter(Product::getActive)
+                .filter(Product::getActive) // MAKE EVERYTHING TO LOWERCASE
                 .map(this::mapToProductPageDto)
                 .collect(Collectors.toList());
     }
@@ -97,7 +97,11 @@ public class ProductService {
         dto.setTitle(product.getTitle());
         dto.setPrice(product.getPrice());
         dto.setClickNumber(product.getClickedNum());
-        dto.setFavorite(getAuthentication() == null || getFavorites().contains(product));
+        if(getAuthentication() == null) {
+            dto.setFavorite(false);
+        } else {
+            dto.setFavorite(getAuthentication().getFavorites().contains(product));
+        }
         dto.setActive(product.getActive());
 
         List<ImageProduct> imageProductList =
@@ -334,6 +338,34 @@ public class ProductService {
 
         if (!getAuthentication().getProducts().contains(product)) {
             throw new ProductViolationException("Product violation.");
+        }
+
+        Calendar maxDateCalendar = calendarRepository.getMaxCalendar();
+
+        List<Calendar> calendar = product.getCalendars();
+
+        if(dto.getBookDateFrom().isBefore(LocalDate.now())) {
+            throw new BadRequestException("Начальная дата должны быть не раньше сегодняшней.");
+        } else {
+            calendarRepository.cutProductCalendarBeforeDate(dto.getBookDateFrom());
+        }
+
+        if(dto.getBookDateTill().isAfter(maxDateCalendar.getDate())) {
+            LocalDate startingDate = maxDateCalendar.getDate().plusDays(1);
+
+            while (startingDate.isBefore(dto.getBookDateTill().plusDays(1))) {
+                Calendar entity = new Calendar();
+
+                entity.setProduct(product);
+                entity.setDate(startingDate);
+                entity.setBooked(false);
+
+                calendar.add(entity);
+
+                startingDate = startingDate.plusDays(1);
+            }
+        } else if(dto.getBookDateTill().isBefore(maxDateCalendar.getDate())) {
+            calendarRepository.cutProductCalendarAfterDate(dto.getBookDateTill());
         }
 
         Category category = categoryRepository.findById(dto.getCategoryId())

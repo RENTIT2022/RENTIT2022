@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -19,5 +20,25 @@ public interface CalendarRepository extends JpaRepository<Calendar, Long> {
             nativeQuery = true
     )
     List<Calendar> getCalendarByProductIdAndYearAndMonth(Long productId, int year, int month);
+
+    @Query(
+            value = "SELECT MAX(date) FROM Calendar",
+            nativeQuery = true
+    )
+    Calendar getMaxCalendar();
+
+    @Query(
+            value = "DELETE FROM Calendar " +
+                    "WHERE date < :bookFromDate",
+            nativeQuery = true
+    )
+    void cutProductCalendarBeforeDate(LocalDate bookFromDate);
+
+    @Query(
+            value = "DELETE FROM Calendar " +
+                    "WHERE date > :bookTillDate",
+            nativeQuery = true
+    )
+    void cutProductCalendarAfterDate(LocalDate bookTillDate);
 
 }

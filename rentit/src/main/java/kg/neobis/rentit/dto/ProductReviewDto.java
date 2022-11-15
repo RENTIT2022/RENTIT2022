@@ -15,7 +15,7 @@ public class ProductReviewDto {
 
     private String text;
 
-    private byte star;
+    private int star;
 
     private LocalDate date;
 

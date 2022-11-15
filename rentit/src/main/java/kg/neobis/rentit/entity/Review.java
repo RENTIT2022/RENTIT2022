@@ -30,7 +30,7 @@ public class Review {
 
     private LocalDateTime dateTime;
 
-    private byte star;
+    private int star;
 
     @ManyToOne
     @JoinColumn(

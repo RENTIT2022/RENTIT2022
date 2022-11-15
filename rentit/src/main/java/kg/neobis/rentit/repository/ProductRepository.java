@@ -48,4 +48,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     )
     List<Product> getProductBySearch(String text);
 
+//    List<Product> getFavoritesBy
+
 }
