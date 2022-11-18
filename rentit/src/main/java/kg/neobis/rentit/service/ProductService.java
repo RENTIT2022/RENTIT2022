@@ -435,6 +435,34 @@ public class ProductService {
     }
 
     @Transactional
+    public String deleteProductImage(Long imageId, Long productId, int orderNumber) {
+        Image image = imageRepository.findById(imageId)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Image was not found with ID: " + imageId)
+                );
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Product was not found with ID: "
+                                + productId)
+                );
+
+        User owner = product.getUser();
+
+        User authUser = getAuthentication();
+
+        if(!owner.getId().equals(authUser.getId())) {
+            throw new ProductViolationException("Product violation.");
+        }
+
+        imageProductRepository.deleteByImageIdAndProductId(image.getId(), product.getId());
+
+        imageProductRepository.setOrderNumbersDown(orderNumber, productId);
+
+        return "Image was successfully deleted.";
+    }
+
+    @Transactional
     public void saveFieldProductValues(List<CategoryField> categoryFields, Product product, HashMap<String, String> fieldProducts) {
         for (CategoryField entity : categoryFields) {
             FieldProduct fieldProduct = new FieldProduct();

@@ -47,6 +47,13 @@ public class ProductController {
         return ResponseEntity.ok(productService.updateProductReplaceImage(file, imageId));
     }
 
+    @PutMapping("/update/image-delete/{imageId}/{productId}/{orderNumber}")
+    public ResponseEntity<String> deleteProductImage(@PathVariable Long imageId,
+                                                     @PathVariable Long productId,
+                                                     @PathVariable int orderNumber) {
+        return ResponseEntity.ok(productService.deleteProductImage(imageId, productId, orderNumber));
+    }
+
     @PutMapping("/activate/{productId}")
     public ResponseEntity<String> activateProduct(@PathVariable Long productId) {
         return ResponseEntity.ok(productService.activateProduct(productId));
