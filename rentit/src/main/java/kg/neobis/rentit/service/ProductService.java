@@ -104,11 +104,14 @@ public class ProductService {
         }
         dto.setActive(product.getActive());
 
-        List<ImageProduct> imageProductList =
-                imageProductRepository.findByProductIdOrderByOrderNumberAsc(product.getId());
+        ImageProduct imageProduct =
+                imageProductRepository.findByProductIdAndOrderNumber(product.getId(), (byte) 1);
 
-        if (!imageProductList.isEmpty()) {
-            dto.setMainImageUrl(imageProductList.get(0).getImage().getUrl().replace("http", "https"));
+        if (imageProduct != null) {
+            Image image = imageProduct.getImage();
+            if(image.getUrl().startsWith("http")) {
+                dto.setMainImageUrl(image.getUrl().replace("http", "https"));
+            }
         }
 
         return dto;
