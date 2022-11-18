@@ -109,7 +109,7 @@ public class ProductService {
 
         if (imageProduct != null) {
             Image image = imageProduct.getImage();
-            if(image.getUrl().startsWith("http")) {
+            if(image != null && image.getUrl().startsWith("http")) {
                 dto.setMainImageUrl(image.getUrl().replace("http", "https"));
             }
         }
