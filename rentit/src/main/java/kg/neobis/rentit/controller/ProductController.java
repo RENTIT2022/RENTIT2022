@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import kg.neobis.rentit.dto.ProductDetailsDto;
 import kg.neobis.rentit.dto.ProductPageDto;
 import kg.neobis.rentit.dto.ProductRegistrationDto;
+import kg.neobis.rentit.dto.ProductReviewDto;
 import kg.neobis.rentit.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -98,6 +99,11 @@ public class ProductController {
     @GetMapping("/get/details/{productId}")
     public ResponseEntity<ProductDetailsDto> getProductDetails(@PathVariable Long productId) {
         return ResponseEntity.ok(productService.getProductDetails(productId));
+    }
+
+    @GetMapping("/get/reviews/{productId}")
+    public ResponseEntity<List<ProductReviewDto>> getProductReviews(@PathVariable Long productId) {
+        return ResponseEntity.ok(productService.getProductReviews(productId));
     }
 
     @GetMapping("/get/recommendations")

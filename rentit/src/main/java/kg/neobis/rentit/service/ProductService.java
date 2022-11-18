@@ -50,8 +50,8 @@ public class ProductService {
 
 
     public List<ProductPageDto> getProductBySearch(String text) {
-        return productRepository.getProductBySearch(text).stream()
-                .filter(Product::getActive) // MAKE EVERYTHING TO LOWERCASE
+        return productRepository.getProductBySearch(text.toLowerCase()).stream()
+                .filter(Product::getActive)
                 .map(this::mapToProductPageDto)
                 .collect(Collectors.toList());
     }
@@ -158,23 +158,6 @@ public class ProductService {
 
         dto.setCharacteristics(characteristics);
 
-        List<ProductReviewDto> reviewsDto = new ArrayList<>();
-
-        product.getReviews().forEach(
-                review -> {
-                    ProductReviewDto reviewDto = new ProductReviewDto();
-
-                    reviewDto.setName(review.getUser().getLastName() + " " + review.getUser().getFirstName());
-                    reviewDto.setStar(review.getStar());
-                    reviewDto.setText(review.getText());
-                    reviewDto.setDate(review.getDateTime().toLocalDate());
-
-                    reviewsDto.add(reviewDto);
-                }
-        );
-
-        dto.setReviews(reviewsDto);
-
         product.setClickedNum(product.getClickedNum() + 1);
 
         productRepository.save(product);
@@ -197,6 +180,30 @@ public class ProductService {
         viewRepository.save(view);
 
         return dto;
+    }
+
+    public List<ProductReviewDto> getProductReviews(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Product was not found with ID: " + productId)
+                );
+
+        List<ProductReviewDto> reviewsDto = new ArrayList<>();
+
+        product.getReviews().forEach(
+                review -> {
+                    ProductReviewDto reviewDto = new ProductReviewDto();
+
+                    reviewDto.setName(review.getUser().getLastName() + " " + review.getUser().getFirstName());
+                    reviewDto.setStar(review.getStar());
+                    reviewDto.setText(review.getText());
+                    reviewDto.setDate(review.getDateTime().toLocalDate());
+
+                    reviewsDto.add(reviewDto);
+                }
+        );
+
+        return reviewsDto;
     }
 
     public List<ProductPageDto> getRecommendations() {

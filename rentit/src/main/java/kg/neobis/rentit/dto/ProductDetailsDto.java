@@ -35,6 +35,4 @@ public class ProductDetailsDto {
 
     private TreeMap<String, String> characteristics;
 
-    private List<ProductReviewDto> reviews;
-
 }
