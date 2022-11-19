@@ -37,7 +37,6 @@ public class ImageService {
                             System.currentTimeMillis() + "",
                             Objects.requireNonNull
                                             (file.getOriginalFilename(), "File must have an extension")
-                                    .substring(file.getOriginalFilename().lastIndexOf("."))
                     )
                     .toFile();
 
