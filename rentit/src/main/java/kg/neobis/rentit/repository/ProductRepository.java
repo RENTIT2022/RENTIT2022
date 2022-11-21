@@ -44,8 +44,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> getRandomProducts();
 
     @Query(
-            "SELECT p FROM Product p WHERE LOWER(p.title) LIKE %:text% ORDER BY p.title"
+            "SELECT p FROM Product p WHERE p.title LIKE %:text% ORDER BY p.title"
     )
     List<Product> getProductBySearch(String text);
+
+//    List<Product> getFavoritesBy
 
 }

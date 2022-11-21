@@ -7,7 +7,7 @@ import kg.neobis.rentit.enums.AuthProvider;
 import kg.neobis.rentit.enums.Status;
 import lombok.*;
 
-import javax.validation.constraints.Email;
+import javax.validation.constraints.*;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;

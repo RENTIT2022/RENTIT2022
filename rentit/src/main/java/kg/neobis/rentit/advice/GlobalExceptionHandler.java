@@ -60,20 +60,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
     }
 
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    protected ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex,
-                                                                      WebRequest request) {
-
-        ApiError err = ApiError.builder()
-                .statusCode(HttpStatus.BAD_REQUEST.value())
-                .timestamp(LocalDateTime.now())
-                .message(String.format("Параметр '%s' значения '%s' не может быть конвертирован в '%s'",
-                        ex.getName(), ex.getValue(), ex.getRequiredType().getSimpleName()))
-                .build();
-
-        return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
-    }
-
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<Object> handleMaxUploadSizeException(MaxUploadSizeExceededException ex) {
 
@@ -90,6 +76,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(err);
     }
 
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    protected ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex,
+                                                                      WebRequest request) {
+
+        ApiError err = ApiError.builder()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .timestamp(LocalDateTime.now())
+                .message(String.format("Параметр '%s' значения '%s' не может быть конвертирован в '%s'",
+                        ex.getName(), ex.getValue(), ex.getRequiredType().getSimpleName()))
+                .build();
+
+        return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Object> handleConstraintViolationException(

@@ -1,7 +1,6 @@
 create table acc_owner_follower (acc_owner int8 not null, follower int8 not null);
 create table "booking" (id int8 not null, booking_date_time timestamp, booking_status int4, date_from date, date_till date, total_price int4, product_id int8, user_id int8, primary key (id));
 create table "booking_calendar" (id int8 not null, booked boolean not null, date date, product_id int8, user_id int8, primary key (id));
-create table "calendar" (id int8 not null, booked boolean not null, date date, product_id int8, user_id int8, primary key (id));
 create table "category" (id int8 not null, name varchar(255), primary key (id));
 create table "category_field" (category_id int8 not null, field_id int8 not null, is_visible boolean not null, primary key (category_id, field_id));
 create table "field" (id int8 not null, name varchar(255), primary key (id));
@@ -15,7 +14,6 @@ create table "paid_ad_waiting_list" (id int8 not null, is_paid boolean not null,
 create table "passport_data" (id int8 not null, authority varchar(255), date_of_issue date, tin varchar(255), primary key (id));
 create table "permission" (id int8 not null, description varchar(255), name varchar(255) not null, primary key (id));
 create table "product" (id int8 not null, active boolean, book_date_from date not null, book_date_till date not null, clicked_num int4 not null, creation_time timestamp, currency varchar(255), description varchar(255), minimum_booking_number_day int4 not null, price int4 not null, title varchar(255) not null, category_id int8, location_id int8, user_id int8, primary key (id));
-create table "question" (id int8 not null, answer varchar(255), question varchar(255), primary key (id));
 create table "registered_address" (id int8 not null, apartment_number int4, city_or_village varchar(255), district varchar(255), house_number int4, region varchar(255), street varchar(255), primary key (id));
 create table "residence_address" (id int8 not null, apartment_number int4, city_or_village varchar(255), district varchar(255), house_number int4, region varchar(255), street varchar(255), primary key (id));
 create table "review" (id int8 not null, date_time timestamp, star int2 not null, text varchar(255), product_id int8, user_id int8, primary key (id));
@@ -25,8 +23,6 @@ create table "user" (id int8 not null, code_expiration_date timestamp, date_of_b
 create table user_favorite (user_id int8 not null, product_id int8 not null);
 create table "view" (id int8 not null, view_num int4 not null, category_id int8, user_id int8, primary key (id));
 
-alter table if exists "calendar" add constraint FKiof4j44vpqu1nmfe4hmfjtalj foreign key (product_id) references "product";
-alter table if exists "calendar" add constraint FKide48qn2pjnp65hr5ej8mtalx foreign key (user_id) references "user";
 alter table if exists "permission" drop constraint if exists UK_2ojme20jpga3r4r79tdso17gi;
 alter table if exists "permission" add constraint UK_2ojme20jpga3r4r79tdso17gi unique (name);
 alter table if exists "role" drop constraint if exists UK_8sewwnpamngi6b1dwaa88askk;
@@ -45,7 +41,6 @@ create sequence paid_ad_waiting_list_seq start 1 increment 1;
 create sequence passport_data_seq start 1 increment 1;
 create sequence permission_seq start 1 increment 1;
 create sequence product_seq start 1 increment 1;
-create sequence question_seq start 1 increment 1;
 create sequence registered_address_seq start 1 increment 1;
 create sequence residence_address_seq start 1 increment 1;
 create sequence review_seq start 1 increment 1;
