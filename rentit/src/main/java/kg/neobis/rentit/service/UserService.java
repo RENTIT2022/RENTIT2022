@@ -5,7 +5,6 @@ import kg.neobis.rentit.entity.*;
 import kg.neobis.rentit.enums.AuthProvider;
 import kg.neobis.rentit.enums.Status;
 import kg.neobis.rentit.exception.AlreadyExistException;
-import kg.neobis.rentit.exception.BadRequestException;
 import kg.neobis.rentit.exception.ResetPasswordCodeExpirationException;
 import kg.neobis.rentit.exception.ResourceNotFoundException;
 import kg.neobis.rentit.mapper.*;

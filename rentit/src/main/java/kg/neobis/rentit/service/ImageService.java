@@ -36,7 +36,7 @@ public class ImageService {
             File saveFile = Files.createTempFile(
                             System.currentTimeMillis() + "",
                             Objects.requireNonNull
-                                            (file.getOriginalFilename(), "File must have an extension")
+                                    (file.getOriginalFilename(), "File must have an extension")
                     )
                     .toFile();
 
@@ -61,7 +61,7 @@ public class ImageService {
             File saveFile = Files.createTempFile(
                             System.currentTimeMillis() + "",
                             Objects.requireNonNull
-                                            (file.getOriginalFilename(), "File must have an extension")
+                                    (file.getOriginalFilename(), "File must have an extension")
                     )
                     .toFile();
 
@@ -90,7 +90,7 @@ public class ImageService {
         File saveFile = Files.createTempFile(
                         System.currentTimeMillis() + "",
                         Objects.requireNonNull
-                                        (file.getOriginalFilename(), "File must have an extension")
+                                (file.getOriginalFilename(), "File must have an extension")
                 )
                 .toFile();
 
