@@ -74,6 +74,17 @@ public class WebSecurityConfig {
                 .accessDeniedHandler(accessDeniedHandler)
                 .and()
                 .authorizeRequests()
+                .antMatchers("/",
+                        "/error",
+                        "/favicon.ico",
+                        "/**/*.png",
+                        "/**/*.gif",
+                        "/**/*.svg",
+                        "/**/*.jpg",
+                        "/**/*.html",
+                        "/**/*.css",
+                        "/**/*.js")
+                .permitAll()
                 .antMatchers("/api/auth/**", "/api/v1/send-reset-code",
                         "/api/v1/check-reset-code", "/oauth2/**", "/swagger-ui/**",
                         "/products/get/main-page/**",
