@@ -91,6 +91,8 @@ public class BookingService {
                     dto.setPrice(entity.getProduct().getPrice());
                     dto.setProductTitle(entity.getProduct().getTitle());
                     dto.setProductId(entity.getProduct().getId());
+                    dto.setBookDateFrom(entity.getDateFrom());
+                    dto.setBookDateTill(entity.getDateTill());
 
                     List<ImageProduct> imageProductList = entity.getProduct().getImageProduct();
 
