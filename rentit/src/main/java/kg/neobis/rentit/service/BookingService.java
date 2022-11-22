@@ -78,7 +78,7 @@ public class BookingService {
         List<Booking> bookings = bookingRepository.getBookingRequests(
                 products.stream()
                         .map(Product::getId)
-                        .collect(Collectors.toList())
+                        .collect(Collectors.toList()), BookingStatus.PENDING
         );
 
         return bookings.stream()

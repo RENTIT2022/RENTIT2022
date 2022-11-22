@@ -1,6 +1,7 @@
 package kg.neobis.rentit.repository;
 
 import kg.neobis.rentit.entity.Booking;
+import kg.neobis.rentit.enums.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -12,11 +13,10 @@ import java.util.List;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query(
-            value = "SELECT * FROM Booking WHERE product_id IN(:products) AND booking_status = 'PENDING' " +
-                    "ORDER BY booking_status DESC",
-            nativeQuery = true
+            value = "SELECT b FROM Booking b WHERE b.product.id IN(:products) AND b.bookingStatus = :status " +
+                    "ORDER BY b.bookingStatus DESC"
     )
-    List<Booking> getBookingRequests(List<Long> products);
+    List<Booking> getBookingRequests(List<Long> products, BookingStatus bookingStatus);
 
     @Query(
             value = "SELECT * FROM Booking " +
