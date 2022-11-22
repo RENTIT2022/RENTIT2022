@@ -12,7 +12,7 @@ import java.util.List;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query(
-            value = "SELECT * FROM Booking WHERE product_id IN(:products) AND booking_status = 'PENDING' " +
+            value = "SELECT * FROM Booking WHERE product_id IN(:products) AND booking_status = 2 " +
                     "ORDER BY booking_status DESC",
             nativeQuery = true
     )
@@ -22,7 +22,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             value = "SELECT * FROM Booking " +
                     "WHERE product_id = :productId " +
                     "AND date_till > :date " +
-                    "AND booking_status = 'ACCEPTED'" +
+                    "AND booking_status = 0 " +
                     "LIMIT 1",
             nativeQuery = true
     )
@@ -32,7 +32,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             value = "SELECT * FROM Booking " +
                     "WHERE product_id = :productId " +
                     "AND date_till < :date " +
-                    "AND booking_status = 'ACCEPTED'" +
+                    "AND booking_status = 0 " +
                     "LIMIT 1",
             nativeQuery = true
     )
