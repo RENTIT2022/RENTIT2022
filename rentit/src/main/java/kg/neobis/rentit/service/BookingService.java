@@ -3,19 +3,13 @@ package kg.neobis.rentit.service;
 import kg.neobis.rentit.dto.BookingRegistrationDto;
 import kg.neobis.rentit.dto.BookingRequestDto;
 import kg.neobis.rentit.dto.UserBookingDto;
-import kg.neobis.rentit.entity.Booking;
+import kg.neobis.rentit.entity.*;
 import kg.neobis.rentit.entity.Calendar;
-import kg.neobis.rentit.entity.ImageProduct;
-import kg.neobis.rentit.entity.Product;
-import kg.neobis.rentit.entity.User;
 import kg.neobis.rentit.enums.BookingStatus;
 import kg.neobis.rentit.exception.AlreadyExistException;
 import kg.neobis.rentit.exception.BadRequestException;
 import kg.neobis.rentit.exception.ResourceNotFoundException;
-import kg.neobis.rentit.repository.BookingRepository;
-import kg.neobis.rentit.repository.CalendarRepository;
-import kg.neobis.rentit.repository.ProductRepository;
-import kg.neobis.rentit.repository.UserRepository;
+import kg.neobis.rentit.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,6 +33,8 @@ public class BookingService {
 
     private final CalendarRepository calendarRepository;
 
+    private final ImageProductRepository imageProductRepository;
+
 
     public List<UserBookingDto> getUserBookings() {
         User user = getAuthentication();
@@ -53,16 +49,7 @@ public class BookingService {
                             dto.setProductId(entity.getProduct().getId());
                             dto.setPrice(entity.getProduct().getPrice());
                             dto.setProductTitle(entity.getProduct().getTitle());
-
-                            List<ImageProduct> imageProductList = entity.getProduct().getImageProduct();
-
-                            for (ImageProduct imageProduct : imageProductList) {
-
-                                if (imageProduct.getOrderNumber() == 0) {
-                                    dto.setMainImageUrl(imageProduct.getImage().getUrl());
-                                    break;
-                                }
-                            }
+                            dto.setMainImageUrl(returnMainImageUrl(entity));
 
                             return dto;
                         }
@@ -93,20 +80,26 @@ public class BookingService {
                     dto.setProductId(entity.getProduct().getId());
                     dto.setBookDateFrom(entity.getDateFrom());
                     dto.setBookDateTill(entity.getDateTill());
-
-                    List<ImageProduct> imageProductList = entity.getProduct().getImageProduct();
-
-                    for (ImageProduct imageProduct : imageProductList) {
-
-                        if (imageProduct.getOrderNumber() == 0) {
-                            dto.setMainImageUrl(imageProduct.getImage().getUrl());
-                            break;
-                        }
-                    }
+                    dto.setMainImageUrl(returnMainImageUrl(entity));
 
                     return dto;
                 })
                 .collect(Collectors.toList());
+    }
+
+    private String returnMainImageUrl(Booking entity) {
+        ImageProduct imageProduct =
+                imageProductRepository.findByProductIdAndOrderNumber(entity.getProduct().getId(),
+                        (byte) 1);
+
+        if (imageProduct != null) {
+            Image image = imageProduct.getImage();
+            if(image != null && image.getUrl().startsWith("http")) {
+                return image.getUrl().replace("http", "https");
+            }
+        }
+
+        return "";
     }
 
     public BookingRegistrationDto bookProduct(BookingRegistrationDto dto) {
