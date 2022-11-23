@@ -102,4 +102,9 @@ public class Product {
     )
     private List<Calendar> calendars;
 
+    @ManyToMany(
+            mappedBy = "favoriteProducts"
+    )
+    private List<User> favoriteUser;
+
 }

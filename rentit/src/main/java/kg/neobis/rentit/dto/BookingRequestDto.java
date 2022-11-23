@@ -27,6 +27,6 @@ public class BookingRequestDto {
 
     private LocalDate bookDateTill;
 
-    private int price;
+    private int totalPrice;
 
 }

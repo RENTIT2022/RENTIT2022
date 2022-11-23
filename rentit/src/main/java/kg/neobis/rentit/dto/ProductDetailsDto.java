@@ -23,6 +23,8 @@ public class ProductDetailsDto {
 
     private int price;
 
+    private int likedNum;
+
     private boolean isFavorite;
 
     private boolean isActive;

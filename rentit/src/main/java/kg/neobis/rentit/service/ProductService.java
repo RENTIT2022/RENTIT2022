@@ -100,7 +100,7 @@ public class ProductService {
         if(getAuthentication() == null) {
             dto.setFavorite(false);
         } else {
-            dto.setFavorite(getAuthentication().getFavorites().contains(product));
+            dto.setFavorite(getAuthentication().getFavoriteProducts().contains(product));
         }
         dto.setActive(product.getActive());
 
@@ -131,7 +131,8 @@ public class ProductService {
         dto.setPrice(product.getPrice());
         dto.setLocation(product.getLocation());
         dto.setClickNumber(product.getClickedNum());
-        dto.setFavorite(getAuthentication().getFavorites().contains(product));
+        dto.setLikedNum(product.getFavoriteUser().size());
+        dto.setFavorite(getAuthentication().getFavoriteProducts().contains(product));
         dto.setMinimumBookingNumberDay(product.getMinimumBookingNumberDay());
         dto.setActive(product.getActive());
 
@@ -239,7 +240,7 @@ public class ProductService {
     }
 
     public List<ProductPageDto> getFavorites() {
-        return getAuthentication().getFavorites().stream()
+        return getAuthentication().getFavoriteProducts().stream()
                 .map(this::mapToProductPageDto)
                 .collect(Collectors.toList());
     }
@@ -538,7 +539,7 @@ public class ProductService {
             throw new BadRequestException("You cannot add your product to favorites.");
         }
 
-        List<Product> favorites = user.getFavorites();
+        List<Product> favorites = user.getFavoriteProducts();
 
         favorites.add(product);
 
@@ -556,7 +557,7 @@ public class ProductService {
 
         User user = userRepository.findByEmail(UserService.getAuthentication().getName());
 
-        List<Product> favorites = user.getFavorites();
+        List<Product> favorites = user.getFavoriteProducts();
 
         favorites.remove(product);
 

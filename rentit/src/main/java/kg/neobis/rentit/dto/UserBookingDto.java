@@ -19,6 +19,6 @@ public class UserBookingDto {
 
     private String status;
 
-    private int price;
+    private int totalPrice;
 
 }
