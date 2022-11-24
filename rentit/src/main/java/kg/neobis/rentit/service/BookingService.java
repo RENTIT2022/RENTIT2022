@@ -236,6 +236,11 @@ public class BookingService {
                         () -> new ResourceNotFoundException("Booking was not found with ID: " + bookingId)
                 );
 
+        if(!getAuthentication().getId().equals(booking.getProduct().getUser().getId())) {
+            throw new ProductViolationException("Вы не можете принять решение по этому продукту, " +
+                    "так как он не принадлежить вам.");
+        }
+
         booking.setBookingStatus(BookingStatus.ACCEPTED);
 
         bookingRepository.save(booking);
@@ -256,6 +261,11 @@ public class BookingService {
                 .orElseThrow(
                         () -> new ResourceNotFoundException("Booking was not found with ID: " + bookingId)
                 );
+
+        if(!getAuthentication().getId().equals(booking.getProduct().getUser().getId())) {
+            throw new ProductViolationException("Вы не можете принять решение по этому продукту, " +
+                    "так как он не принадлежить вам.");
+        }
 
         booking.setBookingStatus(BookingStatus.REJECTED);
 
