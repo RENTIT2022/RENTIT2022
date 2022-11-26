@@ -25,9 +25,13 @@ public class ProductDetailsDto {
 
     private int likedNum;
 
+    private String rating;
+
     private boolean isFavorite;
 
     private boolean isActive;
+
+    private boolean isBlocked;
 
     private int minimumBookingNumberDay;
 

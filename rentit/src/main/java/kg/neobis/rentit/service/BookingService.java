@@ -52,6 +52,8 @@ public class BookingService {
                             dto.setTotalPrice(entity.getTotalPrice());
                             dto.setProductTitle(entity.getProduct().getTitle());
                             dto.setMainImageUrl(returnMainImageUrl(entity));
+                            dto.setBookFrom(entity.getDateFrom());
+                            dto.setBookTill(entity.getDateTill());
 
                             return dto;
                         }

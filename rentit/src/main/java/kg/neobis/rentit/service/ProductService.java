@@ -48,6 +48,8 @@ public class ProductService {
 
     private final BookingRepository bookingRepository;
 
+    private final ComplaintRepository complaintRepository;
+
 
     public List<ProductPageDto> getProductBySearch(String text) {
         return productRepository.getProductBySearch(text.toLowerCase()).stream()
@@ -90,6 +92,44 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    public List<ProductPageDto> getRecommendations() {
+        List<View> views = viewRepository.findAllByUserId(getAuthentication().getId());
+
+        List<Long> categories = new ArrayList<>();
+
+        int max = 0;
+
+        for (View view : views) {
+            if (view.getViewNum() > max) {
+                if (categories.size() > 1) {
+                    categories.clear();
+                }
+                categories.add(view.getCategory().getId());
+                max = view.getViewNum();
+            } else if (view.getViewNum() == max) {
+                categories.add(view.getCategory().getId());
+            }
+        }
+
+        if (categories.isEmpty()) {
+            return productRepository.getRandomProducts().stream()
+                    .filter(Product::getActive)
+                    .map(this::mapToProductPageDto)
+                    .collect(Collectors.toList());
+        }
+
+        return productRepository.getRandomProductsByCategory(categories).stream()
+                .filter(Product::getActive)
+                .map(this::mapToProductPageDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<ProductPageDto> getFavorites() {
+        return getAuthentication().getFavoriteProducts().stream()
+                .map(this::mapToProductPageDto)
+                .collect(Collectors.toList());
+    }
+
     private ProductPageDto mapToProductPageDto(Product product) {
         ProductPageDto dto = new ProductPageDto();
 
@@ -97,11 +137,13 @@ public class ProductService {
         dto.setTitle(product.getTitle());
         dto.setPrice(product.getPrice());
         dto.setClickNumber(product.getClickedNum());
+
         if(getAuthentication() == null) {
             dto.setFavorite(false);
         } else {
             dto.setFavorite(getAuthentication().getFavoriteProducts().contains(product));
         }
+
         dto.setActive(product.getActive());
 
         ImageProduct imageProduct =
@@ -131,10 +173,11 @@ public class ProductService {
         dto.setPrice(product.getPrice());
         dto.setLocation(product.getLocation());
         dto.setClickNumber(product.getClickedNum());
-        dto.setLikedNum(product.getFavoriteUser().size());
+        dto.setLikedNum(product.getFavoriteUsers().size());
         dto.setFavorite(getAuthentication().getFavoriteProducts().contains(product));
         dto.setMinimumBookingNumberDay(product.getMinimumBookingNumberDay());
         dto.setActive(product.getActive());
+        dto.setBlocked(product.getUser().getBlocked());
 
         dto.setImages(imageProductRepository.findByProductIdOrderByOrderNumberAsc(productId).stream()
                 .map(e -> {
@@ -148,6 +191,15 @@ public class ProductService {
                 })
                 .collect(Collectors.toList())
         );
+
+        List<Review> reviews = product.getReviews();
+
+        double rating = (double) reviews.stream()
+                .map(Review::getStar)
+                .mapToInt(Integer::intValue)
+                .sum() / reviews.size();
+
+        dto.setRating(String.format("%.1f", rating));
 
         Set<FieldProduct> fieldProducts = product.getFieldProducts();
 
@@ -205,44 +257,6 @@ public class ProductService {
         );
 
         return reviewsDto;
-    }
-
-    public List<ProductPageDto> getRecommendations() {
-        List<View> views = viewRepository.findAllByUserId(getAuthentication().getId());
-
-        List<Long> categories = new ArrayList<>();
-
-        int max = 0;
-
-        for (View view : views) {
-            if (view.getViewNum() > max) {
-                if (categories.size() > 1) {
-                    categories.clear();
-                }
-                categories.add(view.getCategory().getId());
-                max = view.getViewNum();
-            } else if (view.getViewNum() == max) {
-                categories.add(view.getCategory().getId());
-            }
-        }
-
-        if (categories.isEmpty()) {
-            return productRepository.getRandomProducts().stream()
-                    .filter(Product::getActive)
-                    .map(this::mapToProductPageDto)
-                    .collect(Collectors.toList());
-        }
-
-        return productRepository.getRandomProductsByCategory(categories).stream()
-                .filter(Product::getActive)
-                .map(this::mapToProductPageDto)
-                .collect(Collectors.toList());
-    }
-
-    public List<ProductPageDto> getFavorites() {
-        return getAuthentication().getFavoriteProducts().stream()
-                .map(this::mapToProductPageDto)
-                .collect(Collectors.toList());
     }
 
     @Transactional

@@ -110,6 +110,7 @@ public class UserService implements UserDetailsService {
                 .email(user.getEmail())
                 .password(user.getPassword())
                 .role(role)
+                .blocked(false)
                 .build();
 
         userPrincipal.setAttributes(attributes);
@@ -132,6 +133,7 @@ public class UserService implements UserDetailsService {
                 .registeredAddress(new RegisteredAddress(" ", " ", " ", " ", 0, 0))
                 .residenceAddress(new ResidenceAddress(" ", " ", " ", " ", 0, 0))
                 .role(role)
+                .blocked(false)
                 .password(passwordEncoder.encode(userIncompleteRegisterDTO.getPassword()))
                 .isRegistrationComplete(false)
                 .isVerifiedByTechSupport(false)
@@ -179,6 +181,7 @@ public class UserService implements UserDetailsService {
         user.setLastName(userCompleteRegisterDto.getLastName());
         user.setPhoneNumber(userCompleteRegisterDto.getPhoneNumber());
         user.setDateOfBirth(userCompleteRegisterDto.getDateOfBirth());
+        user.setBlocked(false);
         user.setPassportData(PassportDataMapper
                 .passportDataDtoToPassportData(userCompleteRegisterDto.getPassportData()));
         user.setRegisteredAddress(RegisteredAddressMapper
@@ -253,6 +256,7 @@ public class UserService implements UserDetailsService {
         user.setLastName(userCompleteRegisterDto.getLastName());
         user.setPhoneNumber(userCompleteRegisterDto.getPhoneNumber());
         user.setDateOfBirth(userCompleteRegisterDto.getDateOfBirth());
+        user.setBlocked(false);
         user.setPassportData(PassportDataMapper
                 .passportDataDtoToPassportData(userCompleteRegisterDto.getPassportData()));
         user.setRegisteredAddress(RegisteredAddressMapper

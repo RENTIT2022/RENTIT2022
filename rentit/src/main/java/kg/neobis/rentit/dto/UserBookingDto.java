@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,5 +22,9 @@ public class UserBookingDto {
     private String status;
 
     private int totalPrice;
+
+    private LocalDate bookFrom;
+
+    private LocalDate bookTill;
 
 }

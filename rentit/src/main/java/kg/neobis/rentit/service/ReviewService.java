@@ -36,7 +36,7 @@ public class ReviewService {
         User user = userRepository.findByEmail(UserService.getAuthentication().getName());
 
         if(user.getId().equals(product.getUser().getId())) {
-            throw new BadRequestException("You cannot add your product to favorites.");
+            throw new BadRequestException("Вы не можете добавить отзыв к своему продукту, не положено.");
         }
 
         Review review = reviewRepository.findByUserIdAndProductId(user.getId(), product.getId());
@@ -46,14 +46,11 @@ public class ReviewService {
 
             review.setUser(user);
             review.setProduct(product);
-            review.setText(dto.getText());
-            review.setStar(dto.getStar());
-            review.setDateTime(LocalDateTime.now());
-        } else {
-            review.setText(dto.getText());
-            review.setStar(dto.getStar());
-            review.setDateTime(LocalDateTime.now());
         }
+
+        review.setText(dto.getText());
+        review.setStar(dto.getStar());
+        review.setDateTime(LocalDateTime.now());
 
         reviewRepository.save(review);
 
@@ -66,6 +63,12 @@ public class ReviewService {
                         () -> new ResourceNotFoundException("Review was not found with ID: "
                                 + dto.getReviewId())
                 );
+
+        User user = userRepository.findByEmail(UserService.getAuthentication().getName());
+
+        if(!review.getUser().getId().equals(user.getId())) {
+            throw new BadRequestException("Вы не можете изменить отзыв, так как он не ваш.");
+        }
 
         review.setStar(dto.getStar());
         review.setText(dto.getText());

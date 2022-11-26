@@ -105,6 +105,6 @@ public class Product {
     @ManyToMany(
             mappedBy = "favoriteProducts"
     )
-    private List<User> favoriteUser;
+    private List<User> favoriteUsers;
 
 }

@@ -11,7 +11,10 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query(
-            value = "SELECT * FROM Product p " +
+            value = "SELECT * FROM product p " +
+                    "INNER JOIN \"user\" u " +
+                    "ON u.id = p.user_id " +
+                    "WHERE u.blocked = false " +
                     "ORDER BY p.creation_time DESC " +
                     "LIMIT 20 OFFSET :offset",
             nativeQuery = true
@@ -20,7 +23,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query(
             value = "SELECT * FROM Product p " +
+                    "INNER JOIN \"user\" u " +
+                    "ON p.user_id = u.id " +
                     "WHERE p.category_id = :categoryId " +
+                    "AND u.blocked = false " +
                     "ORDER BY p.creation_time DESC " +
                     "LIMIT 20 OFFSET :offset",
             nativeQuery = true
@@ -29,7 +35,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query(
             value = "SELECT * FROM Product " +
+                    "INNER JOIN \"user\" u " +
+                    "ON p.user_id = u.id " +
                     "WHERE category_id IN :categories " +
+                    "AND u.blocked = false " +
                     "ORDER BY RANDOM() " +
                     "LIMIT 9",
             nativeQuery = true
@@ -38,13 +47,19 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query(
             value = "SELECT * FROM Product " +
+                    "INNER JOIN \"user\" u " +
+                    "ON p.user_id = u.id " +
+                    "WHERE u.blocked = false " +
                     "ORDER BY RANDOM() LIMIT 9",
             nativeQuery = true
     )
     List<Product> getRandomProducts();
 
     @Query(
-            "SELECT p FROM Product p WHERE p.title LIKE %:text% ORDER BY p.title"
+            value = "SELECT p FROM Product p " +
+                    "WHERE p.title LIKE %:text% " +
+                    "AND p.user.blocked = false " +
+                    "ORDER BY p.title"
     )
     List<Product> getProductBySearch(String text);
 

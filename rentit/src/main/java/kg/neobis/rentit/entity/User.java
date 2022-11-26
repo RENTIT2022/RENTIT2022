@@ -103,6 +103,8 @@ public class User implements OAuth2User, UserDetails {
 
     private String providerId;
 
+    private Boolean blocked;
+
     @Transient
     private Map<String, Object> attributes;
 

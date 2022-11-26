@@ -24,6 +24,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findUserByResetPasswordCode(Integer code);
 
-    @Query("SELECT u FROM User u WHERE u.isRegistrationComplete = true and u.isVerifiedByTechSupport = false")
+    @Query("SELECT u FROM User u " +
+            "WHERE u.isRegistrationComplete = true " +
+            "and u.isVerifiedByTechSupport = false")
     List<User> findAllNotVerifiedUsers();
+
+    @Query("SELECT u FROM User u " +
+            "WHERE u.blocked = true")
+    List<User> getBlockedUsers();
 }
