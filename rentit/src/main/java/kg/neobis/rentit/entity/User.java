@@ -103,6 +103,8 @@ public class User implements OAuth2User, UserDetails {
 
     private String providerId;
 
+    private Boolean blocked;
+
     @Transient
     private Map<String, Object> attributes;
 
@@ -139,7 +141,7 @@ public class User implements OAuth2User, UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
-    private List<Product> favorites;
+    private List<Product> favoriteProducts;
 
     @OneToMany(
             cascade = CascadeType.ALL,
@@ -159,7 +161,8 @@ public class User implements OAuth2User, UserDetails {
     private List<View> views;
 
     @OneToMany(
-            mappedBy = "user"
+            mappedBy = "user",
+            fetch = FetchType.LAZY
     )
     private List<Booking> bookings;
 

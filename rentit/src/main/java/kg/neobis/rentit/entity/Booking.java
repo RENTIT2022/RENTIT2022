@@ -38,17 +38,13 @@ public class Booking {
 
     private BookingStatus bookingStatus;
 
-    @ManyToOne(
-            cascade = CascadeType.ALL
-    )
+    @ManyToOne
     @JoinColumn(
             name = "user_id"
     )
     private User user;
 
-    @ManyToOne(
-            cascade = CascadeType.ALL
-    )
+    @ManyToOne
     @JoinColumn(
             name = "product_id"
     )

@@ -5,10 +5,12 @@ import kg.neobis.rentit.entity.*;
 import kg.neobis.rentit.enums.AuthProvider;
 import kg.neobis.rentit.enums.Status;
 import kg.neobis.rentit.exception.AlreadyExistException;
-import kg.neobis.rentit.exception.BadRequestException;
 import kg.neobis.rentit.exception.ResetPasswordCodeExpirationException;
 import kg.neobis.rentit.exception.ResourceNotFoundException;
 import kg.neobis.rentit.mapper.*;
+import kg.neobis.rentit.repository.ComplaintRepository;
+import kg.neobis.rentit.repository.ProductRepository;
+import kg.neobis.rentit.repository.ReviewRepository;
 import kg.neobis.rentit.repository.UserRepository;
 import kg.neobis.rentit.security.jwt.JwtProvider;
 import kg.neobis.rentit.security.response.JwtResponse;
@@ -32,22 +34,41 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
 
     private final Long resetPasswordCodeExpirationMs;
+
     private final UserRepository userRepository;
+
     private final RoleService roleService;
+
     private final ImageService imageService;
+
     private final ImageUserService imageUserService;
+
     private final BCryptPasswordEncoder passwordEncoder;
+
     private final JwtProvider jwtProvider;
+
     private final JavaMailSender javaMailSender;
+
+    private final ComplaintRepository complaintRepository;
+
+    private final ReviewRepository reviewRepository;
+
+    private final ProductRepository productRepository;
+
+    private final ProductService productService;
+
 
     public UserService(@Value("${resetPasswordCodeExpirationMs}")Long resetPasswordCodeExpirationMs, UserRepository userRepository,
                        RoleService roleService, ImageService imageService, ImageUserService imageUserService,
-                       BCryptPasswordEncoder passwordEncoder, JwtProvider jwtProvider, JavaMailSender javaMailSender) {
+                       BCryptPasswordEncoder passwordEncoder, JwtProvider jwtProvider,
+                       JavaMailSender javaMailSender, ComplaintRepository complaintRepository,
+                       ReviewRepository reviewRepository, ProductRepository productRepository, ProductService productService) {
         this.resetPasswordCodeExpirationMs = resetPasswordCodeExpirationMs;
         this.userRepository = userRepository;
         this.roleService = roleService;
@@ -56,6 +77,10 @@ public class UserService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
         this.jwtProvider = jwtProvider;
         this.javaMailSender = javaMailSender;
+        this.complaintRepository = complaintRepository;
+        this.reviewRepository = reviewRepository;
+        this.productRepository = productRepository;
+        this.productService = productService;
     }
 
     @Override
@@ -88,16 +113,23 @@ public class UserService implements UserDetailsService {
         return userDtos;
     }
 
-    public UserDto getUserById(Long id) {
+    public User getById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Could not find user by id = " + id));
+
+        return user;
+    }
+
+    public UserDto getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден!"));
 
         return UserMapper.userToUserDto(user);
     }
 
     public UserDto getUserByEmail(String email) {
         User user = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Could not find user by email = " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден!"));
 
         return UserMapper.userToUserDto(user);
     }
@@ -110,6 +142,7 @@ public class UserService implements UserDetailsService {
                 .email(user.getEmail())
                 .password(user.getPassword())
                 .role(role)
+                .blocked(false)
                 .build();
 
         userPrincipal.setAttributes(attributes);
@@ -132,6 +165,7 @@ public class UserService implements UserDetailsService {
                 .registeredAddress(new RegisteredAddress(" ", " ", " ", " ", 0, 0))
                 .residenceAddress(new ResidenceAddress(" ", " ", " ", " ", 0, 0))
                 .role(role)
+                .blocked(false)
                 .password(passwordEncoder.encode(userIncompleteRegisterDTO.getPassword()))
                 .isRegistrationComplete(false)
                 .isVerifiedByTechSupport(false)
@@ -159,7 +193,7 @@ public class UserService implements UserDetailsService {
     @Transactional
     public UserDto registerUserCompleteParameter(UserCompleteRegisterDto userCompleteRegisterDto) {
         User user = userRepository.findById(userCompleteRegisterDto.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Could not find user by id = " + userCompleteRegisterDto.getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден!"));
 
         try {
             long tin = Long.parseLong(userCompleteRegisterDto.getPassportData().getTin());
@@ -177,8 +211,10 @@ public class UserService implements UserDetailsService {
 
         user.setFirstName(userCompleteRegisterDto.getFirstName());
         user.setLastName(userCompleteRegisterDto.getLastName());
+        user.setMiddleName(userCompleteRegisterDto.getMiddleName());
         user.setPhoneNumber(userCompleteRegisterDto.getPhoneNumber());
         user.setDateOfBirth(userCompleteRegisterDto.getDateOfBirth());
+        user.setBlocked(false);
         user.setPassportData(PassportDataMapper
                 .passportDataDtoToPassportData(userCompleteRegisterDto.getPassportData()));
         user.setRegisteredAddress(RegisteredAddressMapper
@@ -192,7 +228,7 @@ public class UserService implements UserDetailsService {
     @Transactional
     public UserDto registerUserCompleteFiles(Long id, MultipartFile[] multipartFiles) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Could not find user by id = " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден!"));
 
         if(multipartFiles.length != 3) {
             throw new IllegalArgumentException("Должно быть 3 фотографии паспорта");
@@ -218,7 +254,7 @@ public class UserService implements UserDetailsService {
     @Transactional
     public UserDto registerUserComplete(UserCompleteRegisterDto userCompleteRegisterDto, MultipartFile[] multipartFiles) {
         User user = userRepository.findById(userCompleteRegisterDto.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Could not find user by id = " + userCompleteRegisterDto.getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден!"));
 
         try {
             long tin = Long.parseLong(userCompleteRegisterDto.getPassportData().getTin());
@@ -253,6 +289,7 @@ public class UserService implements UserDetailsService {
         user.setLastName(userCompleteRegisterDto.getLastName());
         user.setPhoneNumber(userCompleteRegisterDto.getPhoneNumber());
         user.setDateOfBirth(userCompleteRegisterDto.getDateOfBirth());
+        user.setBlocked(false);
         user.setPassportData(PassportDataMapper
                 .passportDataDtoToPassportData(userCompleteRegisterDto.getPassportData()));
         user.setRegisteredAddress(RegisteredAddressMapper
@@ -267,7 +304,7 @@ public class UserService implements UserDetailsService {
 
     public UserDto acceptUser(Long id) throws MessagingException {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Could not find user by id = " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден!"));
 
         user.setVerifiedByTechSupport(true);
 
@@ -279,7 +316,7 @@ public class UserService implements UserDetailsService {
 
     public UserDto rejectUser(Long id) throws MessagingException {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Could not find user by id = " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден!"));
 
         user.setLastName("");
         user.setPhoneNumber("");
@@ -378,7 +415,7 @@ public class UserService implements UserDetailsService {
     @Transactional
     public MessageResponse updatePassword(ChangePasswordDto changePasswordDTO) {
         User user = userRepository.findById(changePasswordDTO.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("Could not find user with id: " + changePasswordDTO.getUserId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден!"));
 
         if(changePasswordDTO.getOldPassword().equals("")) {
             String encodedPassword = passwordEncoder.encode(changePasswordDTO.getNewPassword());
@@ -410,10 +447,47 @@ public class UserService implements UserDetailsService {
 
     public MessageResponse deleteUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Could not find user by id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден!"));
 
         userRepository.delete(user);
 
-        return new MessageResponse("User successfully deleted with id: " + id);
+        return new MessageResponse("Пользователь успешно удален!");
     }
+
+    public UserProfileDto getProfile() {
+        User user = userRepository.findByEmail(getAuthentication().getName());
+
+        if (user == null) {
+            throw new ResourceNotFoundException("User is not authenticated");
+        }
+
+        int rating = 100 - complaintRepository
+                .getComplaintsNumberByAddresseeId(user.getId());
+
+        for(Product p: user.getProducts()) {
+            List<Review> reviews = reviewRepository.findAllByProductId(p.getId());
+
+            double sum = (double) reviews.stream()
+                    .mapToInt(Review::getStar).sum() / reviews.size();
+
+            if(sum >= 4.9) {
+                rating += 5;
+            }
+        }
+
+        UserProfileDto dto = new UserProfileDto();
+
+        dto.setProfileRating(rating > 100 ? 100 : Math.max(rating, 1));
+        dto.setUserId(user.getId());
+        dto.setPhoneNumber(user.getPhoneNumber());
+        dto.setFullName(user.getLastName() + " " + user.getFirstName());
+        dto.setProducts(
+                productRepository.findAllByUserIdOrderByActiveAscCreationTimeDesc(user.getId()).stream()
+                        .map(productService::mapToProductPageDto)
+                        .collect(Collectors.toList())
+        );
+
+        return dto;
+    }
+
 }

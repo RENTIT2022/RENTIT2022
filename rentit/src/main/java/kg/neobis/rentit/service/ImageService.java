@@ -36,7 +36,7 @@ public class ImageService {
             File saveFile = Files.createTempFile(
                             System.currentTimeMillis() + "",
                             Objects.requireNonNull
-                                            (file.getOriginalFilename(), "File must have an extension")
+                                    (file.getOriginalFilename(), "File must have an extension")
                     )
                     .toFile();
 
@@ -61,7 +61,7 @@ public class ImageService {
             File saveFile = Files.createTempFile(
                             System.currentTimeMillis() + "",
                             Objects.requireNonNull
-                                            (file.getOriginalFilename(), "File must have an extension")
+                                    (file.getOriginalFilename(), "File must have an extension")
                     )
                     .toFile();
 
@@ -69,10 +69,10 @@ public class ImageService {
 
             Map upload = cloudinary.uploader().upload(saveFile, ObjectUtils.emptyMap());
 
-            Image image =  imageRepository.findById(id)
+            Image image = imageRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Could not find image by id = " + id));
 
-            if(!image.getPublicId().equals(" ")) {
+            if (!image.getPublicId().equals(" ")) {
                 cloudinary.uploader().destroy(image.getPublicId(), ObjectUtils.emptyMap());
             }
 
@@ -90,7 +90,7 @@ public class ImageService {
         File saveFile = Files.createTempFile(
                         System.currentTimeMillis() + "",
                         Objects.requireNonNull
-                                        (file.getOriginalFilename(), "File must have an extension")
+                                (file.getOriginalFilename(), "File must have an extension")
                 )
                 .toFile();
 

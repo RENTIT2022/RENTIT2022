@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,10 +19,16 @@ public class BookingRequestDto {
 
     private String clientName;
 
+    private int profileRating;
+
     private String productTitle;
 
     private String mainImageUrl;
 
-    private int price;
+    private LocalDate bookDateFrom;
+
+    private LocalDate bookDateTill;
+
+    private int totalPrice;
 
 }

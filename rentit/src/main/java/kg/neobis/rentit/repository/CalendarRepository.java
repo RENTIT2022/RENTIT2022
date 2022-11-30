@@ -41,4 +41,13 @@ public interface CalendarRepository extends JpaRepository<Calendar, Long> {
     )
     void cutProductCalendarAfterDate(LocalDate bookTillDate);
 
+    @Query(
+            value = "SELECT * FROM Calendar " +
+                    "WHERE date >= :dateFrom " +
+                    "AND date <= :dateTill " +
+                    "AND product_id = :productId",
+            nativeQuery = true
+    )
+    List<Calendar> getCalendarByDates(LocalDate dateFrom, LocalDate dateTill, Long productId);
+
 }

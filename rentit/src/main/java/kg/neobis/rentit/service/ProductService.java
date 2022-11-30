@@ -1,8 +1,8 @@
 package kg.neobis.rentit.service;
 
 import kg.neobis.rentit.dto.*;
-import kg.neobis.rentit.entity.*;
 import kg.neobis.rentit.entity.Calendar;
+import kg.neobis.rentit.entity.*;
 import kg.neobis.rentit.exception.AlreadyExistException;
 import kg.neobis.rentit.exception.BadRequestException;
 import kg.neobis.rentit.exception.ProductViolationException;
@@ -49,6 +49,42 @@ public class ProductService {
     private final BookingRepository bookingRepository;
 
 
+    public List<ProductMapDto> getMapProducts(Long categoryId) {
+        return productRepository.getMapProductsByCategory(categoryId).stream()
+                .map(
+                        p -> {
+                            ProductMapDto dto = new ProductMapDto();
+
+                            dto.setProductId(p.getId());
+                            dto.setTitle(p.getTitle());
+                            dto.setPrice(p.getPrice());
+                            dto.setLocationX(p.getLocation().getX());
+                            dto.setLocationY(p.getLocation().getY());
+
+                            ImageProduct imageProduct =
+                                    imageProductRepository.findByProductIdAndOrderNumber(p.getId(), (byte) 1);
+
+                            if (imageProduct != null) {
+                                Image image = imageProduct.getImage();
+                                if(image != null && image.getUrl().startsWith("http")) {
+                                    dto.setImageUrl(image.getUrl().replace("http", "https"));
+                                }
+                            }
+
+                            double rating = (double) p.getReviews().stream()
+                                    .map(Review::getStar)
+                                    .mapToInt(Integer::intValue)
+                                    .sum() / p.getReviews().size();
+
+                            dto.setRating(String.format("%.1f", rating));
+                            dto.setReviewNum(p.getReviews().size());
+
+                            return dto;
+                        }
+                )
+                .collect(Collectors.toList());
+    }
+
     public List<ProductPageDto> getProductBySearch(String text) {
         return productRepository.getProductBySearch(text.toLowerCase()).stream()
                 .filter(Product::getActive)
@@ -90,18 +126,64 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    private ProductPageDto mapToProductPageDto(Product product) {
+    public List<ProductPageDto> getRecommendations() {
+        List<View> views = viewRepository.findAllByUserId(getAuthentication().getId());
+
+        List<Long> categories = new ArrayList<>();
+
+        int max = 0;
+
+        for (View view : views) {
+            if (view.getViewNum() > max) {
+                if (categories.size() > 1) {
+                    categories.clear();
+                }
+                categories.add(view.getCategory().getId());
+                max = view.getViewNum();
+            } else if (view.getViewNum() == max) {
+                categories.add(view.getCategory().getId());
+            }
+        }
+
+        if (categories.isEmpty()) {
+            return productRepository.getRandomProducts().stream()
+                    .filter(Product::getActive)
+                    .map(this::mapToProductPageDto)
+                    .collect(Collectors.toList());
+        }
+
+        return productRepository.getRandomProductsByCategory(categories).stream()
+                .filter(Product::getActive)
+                .map(this::mapToProductPageDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<ProductPageDto> getFavorites() {
+        return getAuthentication().getFavoriteProducts().stream()
+                .map(this::mapToProductPageDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<ProductPageDto> getSimilarProducts(Long categoryId) {
+        return productRepository.getSimilarProductsByCategory(categoryId).stream()
+                .map(this::mapToProductPageDto)
+                .collect(Collectors.toList());
+    }
+
+    public ProductPageDto mapToProductPageDto(Product product) {
         ProductPageDto dto = new ProductPageDto();
 
         dto.setProductId(product.getId());
         dto.setTitle(product.getTitle());
         dto.setPrice(product.getPrice());
         dto.setClickNumber(product.getClickedNum());
+
         if(getAuthentication() == null) {
             dto.setFavorite(false);
         } else {
-            dto.setFavorite(getAuthentication().getFavorites().contains(product));
+            dto.setFavorite(getAuthentication().getFavoriteProducts().contains(product));
         }
+
         dto.setActive(product.getActive());
 
         ImageProduct imageProduct =
@@ -131,9 +213,11 @@ public class ProductService {
         dto.setPrice(product.getPrice());
         dto.setLocation(product.getLocation());
         dto.setClickNumber(product.getClickedNum());
-        dto.setFavorite(getAuthentication().getFavorites().contains(product));
+        dto.setLikedNum(product.getFavoriteUsers().size());
+        dto.setFavorite(getAuthentication().getFavoriteProducts().contains(product));
         dto.setMinimumBookingNumberDay(product.getMinimumBookingNumberDay());
         dto.setActive(product.getActive());
+        dto.setBlocked(product.getUser().getBlocked());
 
         dto.setImages(imageProductRepository.findByProductIdOrderByOrderNumberAsc(productId).stream()
                 .map(e -> {
@@ -147,6 +231,16 @@ public class ProductService {
                 })
                 .collect(Collectors.toList())
         );
+
+        List<Review> reviews = product.getReviews();
+
+        double rating = (double) reviews.stream()
+                .map(Review::getStar)
+                .mapToInt(Integer::intValue)
+                .sum() / reviews.size();
+
+        dto.setRating(String.format("%.1f", rating));
+        dto.setReviewNum(reviews.size());
 
         Set<FieldProduct> fieldProducts = product.getFieldProducts();
 
@@ -204,44 +298,6 @@ public class ProductService {
         );
 
         return reviewsDto;
-    }
-
-    public List<ProductPageDto> getRecommendations() {
-        List<View> views = viewRepository.findAllByUserId(getAuthentication().getId());
-
-        List<Long> categories = new ArrayList<>();
-
-        int max = 0;
-
-        for (View view : views) {
-            if (view.getViewNum() > max) {
-                if (categories.size() > 1) {
-                    categories.clear();
-                }
-                categories.add(view.getCategory().getId());
-                max = view.getViewNum();
-            } else if (view.getViewNum() == max) {
-                categories.add(view.getCategory().getId());
-            }
-        }
-
-        if (categories.isEmpty()) {
-            return productRepository.getRandomProducts().stream()
-                    .filter(Product::getActive)
-                    .map(this::mapToProductPageDto)
-                    .collect(Collectors.toList());
-        }
-
-        return productRepository.getRandomProductsByCategory(categories).stream()
-                .filter(Product::getActive)
-                .map(this::mapToProductPageDto)
-                .collect(Collectors.toList());
-    }
-
-    public List<ProductPageDto> getFavorites() {
-        return getAuthentication().getFavorites().stream()
-                .map(this::mapToProductPageDto)
-                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -538,7 +594,7 @@ public class ProductService {
             throw new BadRequestException("You cannot add your product to favorites.");
         }
 
-        List<Product> favorites = user.getFavorites();
+        List<Product> favorites = user.getFavoriteProducts();
 
         favorites.add(product);
 
@@ -556,7 +612,7 @@ public class ProductService {
 
         User user = userRepository.findByEmail(UserService.getAuthentication().getName());
 
-        List<Product> favorites = user.getFavorites();
+        List<Product> favorites = user.getFavoriteProducts();
 
         favorites.remove(product);
 
