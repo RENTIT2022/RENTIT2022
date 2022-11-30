@@ -90,7 +90,11 @@ public class WebSecurityConfig {
                         "/products/get/main-page/**",
                         "/products/get/main-page-by-category/**",
                         "/products/get/search/**",
-                        "/categories/**")
+                        "/categories/**",
+                        "/ws",
+                        "/topic/public",
+                        "/chat-sendMessage",
+                        "/chat-addUser")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
