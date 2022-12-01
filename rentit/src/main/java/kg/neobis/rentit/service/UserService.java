@@ -5,13 +5,11 @@ import kg.neobis.rentit.entity.*;
 import kg.neobis.rentit.enums.AuthProvider;
 import kg.neobis.rentit.enums.Status;
 import kg.neobis.rentit.exception.AlreadyExistException;
+import kg.neobis.rentit.exception.BadRequestException;
 import kg.neobis.rentit.exception.ResetPasswordCodeExpirationException;
 import kg.neobis.rentit.exception.ResourceNotFoundException;
 import kg.neobis.rentit.mapper.*;
-import kg.neobis.rentit.repository.ComplaintRepository;
-import kg.neobis.rentit.repository.ProductRepository;
-import kg.neobis.rentit.repository.ReviewRepository;
-import kg.neobis.rentit.repository.UserRepository;
+import kg.neobis.rentit.repository.*;
 import kg.neobis.rentit.security.jwt.JwtProvider;
 import kg.neobis.rentit.security.response.JwtResponse;
 import kg.neobis.rentit.utils.EmailUtility;
@@ -30,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,12 +62,14 @@ public class UserService implements UserDetailsService {
 
     private final ProductService productService;
 
+    private final ImageRepository imageRepository;
+
 
     public UserService(@Value("${resetPasswordCodeExpirationMs}")Long resetPasswordCodeExpirationMs, UserRepository userRepository,
                        RoleService roleService, ImageService imageService, ImageUserService imageUserService,
                        BCryptPasswordEncoder passwordEncoder, JwtProvider jwtProvider,
                        JavaMailSender javaMailSender, ComplaintRepository complaintRepository,
-                       ReviewRepository reviewRepository, ProductRepository productRepository, ProductService productService) {
+                       ReviewRepository reviewRepository, ProductRepository productRepository, ProductService productService, ImageRepository imageRepository) {
         this.resetPasswordCodeExpirationMs = resetPasswordCodeExpirationMs;
         this.userRepository = userRepository;
         this.roleService = roleService;
@@ -81,6 +82,7 @@ public class UserService implements UserDetailsService {
         this.reviewRepository = reviewRepository;
         this.productRepository = productRepository;
         this.productService = productService;
+        this.imageRepository = imageRepository;
     }
 
     @Override
@@ -487,7 +489,41 @@ public class UserService implements UserDetailsService {
                         .collect(Collectors.toList())
         );
 
+        List<ImageUser> images = user.getImageUser();
+
+        images.forEach(i -> {
+            if(i.getOrderNumber() == (byte) 1) {
+                dto.setImageUrl(i.getImage().getUrl());
+            }
+        });
+
         return dto;
+    }
+
+    public String updateMainImage(Long imageId, MultipartFile file) {
+        Image image = imageService.replaceImage(imageId, file);
+
+        if(image == null) {
+            throw new BadRequestException("Произошла ошибка в процессе обновления картинки.");
+        }
+
+        return "Картинка была успешна заменена.";
+    }
+
+    public String deleteMainImage(Long imageId) throws IOException {
+        Image image = imageRepository.findById(imageId)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Image was not found with ID: " + imageId)
+                );
+
+        imageService.deleteImageFromCloudinary(image.getPublicId());
+
+        image.setUrl("");
+        image.setPublicId("");
+
+        imageRepository.save(image);
+
+        return "Картинка была успешно удалена.";
     }
 
 }

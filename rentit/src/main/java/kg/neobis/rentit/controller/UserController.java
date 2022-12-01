@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -98,8 +99,21 @@ public class UserController {
     }
 
     @Operation(summary = "Get user profile")
-    @DeleteMapping(value = "/get-profile", produces = "application/json")
+    @GetMapping(value = "/get-profile", produces = "application/json")
     public ResponseEntity<UserProfileDto> getProfile() {
         return ResponseEntity.ok(userService.getProfile());
     }
+
+    @Operation(summary = "Изменение аватарки пользователя.")
+    @PutMapping("/update-main-image/{imageId}")
+    public ResponseEntity<String> updateMainImage(@PathVariable Long imageId, @RequestPart MultipartFile file) {
+        return ResponseEntity.ok(userService.updateMainImage(imageId, file));
+    }
+
+    @Operation(summary = "Удаление аватарки пользователя.")
+    @DeleteMapping("/delete-main-image/{imageId}")
+    public ResponseEntity<String> deleteMainImage(@PathVariable Long imageId) throws IOException {
+        return ResponseEntity.ok(userService.deleteMainImage(imageId));
+    }
+
 }

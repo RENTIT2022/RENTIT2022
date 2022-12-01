@@ -19,6 +19,8 @@ public class UserProfileDto {
 
     private String phoneNumber;
 
+    private String imageUrl;
+
     private List<ProductPageDto> products;
 
 }
