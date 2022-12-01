@@ -43,12 +43,11 @@ public class ChatService {
                     Chat chatTemp = chat;
                     chatTemp.getUsers().remove(userTemp);
                     chatsByUserId.add(ChatMapper.chatToChatDto(chatTemp));
-                    return chatsByUserId;
                 }
             }
         }
 
-        return null;
+        return chatsByUserId;
     }
 
     public ChatDto addChat(ChatRequest chatRequest) {
