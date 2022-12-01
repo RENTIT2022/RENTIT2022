@@ -16,11 +16,11 @@ public class Question {
     @Id
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,
-            generator = "calendar_seq"
+            generator = "question_seq"
     )
     @SequenceGenerator(
-            name = "calendar_seq",
-            sequenceName = "calendar_seq",
+            name = "question_seq",
+            sequenceName = "question_seq",
             allocationSize = 1
     )
     private Long id;

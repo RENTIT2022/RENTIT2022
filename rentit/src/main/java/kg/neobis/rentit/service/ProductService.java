@@ -1,8 +1,8 @@
 package kg.neobis.rentit.service;
 
 import kg.neobis.rentit.dto.*;
-import kg.neobis.rentit.entity.*;
 import kg.neobis.rentit.entity.Calendar;
+import kg.neobis.rentit.entity.*;
 import kg.neobis.rentit.exception.AlreadyExistException;
 import kg.neobis.rentit.exception.BadRequestException;
 import kg.neobis.rentit.exception.ProductViolationException;
@@ -48,8 +48,42 @@ public class ProductService {
 
     private final BookingRepository bookingRepository;
 
-    private final ComplaintRepository complaintRepository;
 
+    public List<ProductMapDto> getMapProducts(Long categoryId) {
+        return productRepository.getMapProductsByCategory(categoryId).stream()
+                .map(
+                        p -> {
+                            ProductMapDto dto = new ProductMapDto();
+
+                            dto.setProductId(p.getId());
+                            dto.setTitle(p.getTitle());
+                            dto.setPrice(p.getPrice());
+                            dto.setLocationX(p.getLocation().getX());
+                            dto.setLocationY(p.getLocation().getY());
+
+                            ImageProduct imageProduct =
+                                    imageProductRepository.findByProductIdAndOrderNumber(p.getId(), (byte) 1);
+
+                            if (imageProduct != null) {
+                                Image image = imageProduct.getImage();
+                                if(image != null && image.getUrl().startsWith("http")) {
+                                    dto.setImageUrl(image.getUrl().replace("http", "https"));
+                                }
+                            }
+
+                            double rating = (double) p.getReviews().stream()
+                                    .map(Review::getStar)
+                                    .mapToInt(Integer::intValue)
+                                    .sum() / p.getReviews().size();
+
+                            dto.setRating(String.format("%.1f", rating));
+                            dto.setReviewNum(p.getReviews().size());
+
+                            return dto;
+                        }
+                )
+                .collect(Collectors.toList());
+    }
 
     public List<ProductPageDto> getProductBySearch(String text) {
         return productRepository.getProductBySearch(text.toLowerCase()).stream()
@@ -130,7 +164,13 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    private ProductPageDto mapToProductPageDto(Product product) {
+    public List<ProductPageDto> getSimilarProducts(Long categoryId) {
+        return productRepository.getSimilarProductsByCategory(categoryId).stream()
+                .map(this::mapToProductPageDto)
+                .collect(Collectors.toList());
+    }
+
+    public ProductPageDto mapToProductPageDto(Product product) {
         ProductPageDto dto = new ProductPageDto();
 
         dto.setProductId(product.getId());
@@ -178,6 +218,8 @@ public class ProductService {
         dto.setMinimumBookingNumberDay(product.getMinimumBookingNumberDay());
         dto.setActive(product.getActive());
         dto.setBlocked(product.getUser().getBlocked());
+        dto.setOwnerName(product.getUser().getLastName() + " " + product.getUser().getFirstName());
+        dto.setOwnerId(product.getUser().getId());
 
         dto.setImages(imageProductRepository.findByProductIdOrderByOrderNumberAsc(productId).stream()
                 .map(e -> {
@@ -200,6 +242,7 @@ public class ProductService {
                 .sum() / reviews.size();
 
         dto.setRating(String.format("%.1f", rating));
+        dto.setReviewNum(reviews.size());
 
         Set<FieldProduct> fieldProducts = product.getFieldProducts();
 

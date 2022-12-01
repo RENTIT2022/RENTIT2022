@@ -19,6 +19,8 @@ public class BookingRequestDto {
 
     private String clientName;
 
+    private int profileRating;
+
     private String productTitle;
 
     private String mainImageUrl;

@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -19,19 +18,19 @@ public class RegisteredAddressDto {
     private Long id;
 
     @Schema(description = "Область", example = "Чуйская область", required = true)
-    @NotBlank(message = "Region can't be null or empty")
+    @NotBlank(message = "Область не должна быть пустой")
     private String region;
 
     @Schema(description = "Город/Село", example = "Бишкек", required = true)
-    @NotBlank(message = "CityOrVillage can't be null or empty")
+    @NotBlank(message = "Город/Село не должно быть пустым")
     private String cityOrVillage;
 
     @Schema(description = "Район", example = "Ленинский", required = true)
-    @NotBlank(message = "District can't be null or empty")
+    @NotBlank(message = "Район не должен быть пустым")
     private String district;
 
     @Schema(description = "Улица", example = "Токтогула", required = true)
-    @NotBlank(message = "Street can't be null or empty")
+    @NotBlank(message = "Улица не должна быть пустой")
     private String street;
 
     @Schema(description = "№ дома", example = "1")

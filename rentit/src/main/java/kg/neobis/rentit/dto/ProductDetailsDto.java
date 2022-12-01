@@ -13,6 +13,10 @@ import java.util.TreeMap;
 @AllArgsConstructor
 public class ProductDetailsDto {
 
+    private String ownerName;
+
+    private Long ownerId;
+
     private Long productId;
 
     private String title;
@@ -26,6 +30,8 @@ public class ProductDetailsDto {
     private int likedNum;
 
     private String rating;
+
+    private int reviewNum;
 
     private boolean isFavorite;
 

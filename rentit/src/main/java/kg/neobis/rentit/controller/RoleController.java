@@ -2,7 +2,10 @@ package kg.neobis.rentit.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kg.neobis.rentit.dto.*;
+import kg.neobis.rentit.dto.MyEntry;
+import kg.neobis.rentit.dto.PermissionDto;
+import kg.neobis.rentit.dto.RoleDto;
+import kg.neobis.rentit.dto.RolePermissionDto;
 import kg.neobis.rentit.service.RoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

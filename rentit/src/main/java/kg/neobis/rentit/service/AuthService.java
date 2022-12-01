@@ -78,6 +78,6 @@ public class AuthService {
                     .imageUser(user.getImageUser())
                     .build();
         }
-        throw new AuthException("Invalid Refresh Token [" + refreshToken + "]");
+        throw new AuthException("Неверный refresh token [" + refreshToken + "]");
     }
 }

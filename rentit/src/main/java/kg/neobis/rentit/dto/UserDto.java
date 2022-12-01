@@ -7,7 +7,7 @@ import kg.neobis.rentit.enums.AuthProvider;
 import kg.neobis.rentit.enums.Status;
 import lombok.*;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.Email;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -47,7 +47,7 @@ public class UserDto {
     private ResidenceAddressDto residenceAddress;
 
     @Schema(description = "Email", example = "example@gmail.com")
-    @Email(message = "Email is invalid")
+    @Email(message = "Email не верный")
     private String email;
 
     @Schema(description = "Номер телефона", example = "+996700777777")

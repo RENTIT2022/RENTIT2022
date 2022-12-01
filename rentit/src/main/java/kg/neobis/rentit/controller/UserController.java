@@ -96,4 +96,10 @@ public class UserController {
     public ResponseEntity<MessageResponse> deleteUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.deleteUserById(id));
     }
+
+    @Operation(summary = "Get user profile")
+    @DeleteMapping(value = "/get-profile", produces = "application/json")
+    public ResponseEntity<UserProfileDto> getProfile() {
+        return ResponseEntity.ok(userService.getProfile());
+    }
 }

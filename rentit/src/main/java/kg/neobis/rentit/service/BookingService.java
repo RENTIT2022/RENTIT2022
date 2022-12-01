@@ -3,8 +3,8 @@ package kg.neobis.rentit.service;
 import kg.neobis.rentit.dto.BookingRegistrationDto;
 import kg.neobis.rentit.dto.BookingRequestDto;
 import kg.neobis.rentit.dto.UserBookingDto;
-import kg.neobis.rentit.entity.*;
 import kg.neobis.rentit.entity.Calendar;
+import kg.neobis.rentit.entity.*;
 import kg.neobis.rentit.enums.BookingStatus;
 import kg.neobis.rentit.exception.AlreadyExistException;
 import kg.neobis.rentit.exception.BadRequestException;
@@ -36,6 +36,10 @@ public class BookingService {
     private final CalendarRepository calendarRepository;
 
     private final ImageProductRepository imageProductRepository;
+
+    private final ComplaintRepository complaintRepository;
+
+    private final ReviewRepository reviewRepository;
 
 
     public List<UserBookingDto> getUserBookings() {
@@ -86,6 +90,22 @@ public class BookingService {
                     dto.setBookDateTill(entity.getDateTill());
                     dto.setMainImageUrl(returnMainImageUrl(entity));
 
+                    int rating = 100 - complaintRepository
+                            .getComplaintsNumberByAddresseeId(dto.getClientId());
+
+                    for(Product p: entity.getUser().getProducts()) {
+                        List<Review> reviews = reviewRepository.findAllByProductId(p.getId());
+
+                        double sum = (double) reviews.stream()
+                                .mapToInt(Review::getStar).sum() / reviews.size();
+
+                        if(sum >= 4.9) {
+                            rating += 5;
+                        }
+                    }
+
+                    dto.setProfileRating(rating > 100 ? 100 : Math.max(rating, 1));
+
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -111,12 +131,12 @@ public class BookingService {
         User user = getAuthentication();
 
         if (user == null) {
-            throw new ResourceNotFoundException("User is not authenticated");
+            throw new ResourceNotFoundException("Пользователь не авторизован.");
         }
 
         Product product = productRepository.findById(dto.getProductId())
                 .orElseThrow(
-                        () -> new ResourceNotFoundException("Product was not found with ID: " + dto.getProductId())
+                        () -> new ResourceNotFoundException("Продукт не был найден с айди: " + dto.getProductId())
                 );
 
         LocalDate sumFrom = dto.getDateFrom();
@@ -133,13 +153,13 @@ public class BookingService {
                 dto.getDateTill(), product.getId());
 
         if (days != calendar.size()) {
-            throw new BadRequestException("Incorrect date input. Some of the given dates are not eligible" +
-                    " for booking.");
+            throw new BadRequestException("Неправильный ввод данных. Некоторые переданные даты не " +
+                    "возможны для бронирования.");
         }
 
         for (Calendar entity : calendar) {
             if (entity.isBooked()) {
-                throw new AlreadyExistException("The date is already booked: " + entity.getDate());
+                throw new AlreadyExistException("Дата уже забронирована: " + entity.getDate());
             } else {
                 entity.setBooked(true);
             }
@@ -147,7 +167,7 @@ public class BookingService {
         }
 
         if (user.getId().equals(product.getUser().getId())) {
-            throw new BadRequestException("You cannot book your product.");
+            throw new BadRequestException("Вы не можете забронировать свой продукт.");
         }
 
         Booking booking = new Booking();
@@ -168,7 +188,7 @@ public class BookingService {
     public Map<String, List<Integer>> getProductSchedule(Long productId, int year, int month) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(
-                        () -> new ResourceNotFoundException("Product was not found with ID: " + productId)
+                        () -> new ResourceNotFoundException("Продукт не был найден с айди: " + productId)
                 );
 
         List<Calendar> calendar = calendarRepository
@@ -210,7 +230,8 @@ public class BookingService {
     public String cancelBooking(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(
-                        () -> new ResourceNotFoundException("Booking was not found with ID: " + bookingId)
+                        () -> new ResourceNotFoundException("Бронирование не было найдено с айди: "
+                                + bookingId)
                 );
 
         User user = getAuthentication();
@@ -223,19 +244,21 @@ public class BookingService {
                 booking.getDateTill(), booking.getProduct().getId());
 
         for (Calendar entity : calendar) {
+            entity.setUser(null);
             entity.setBooked(false);
             calendarRepository.save(entity);
         }
 
         bookingRepository.deleteById(booking.getId());
 
-        return "The booking was canceled.";
+        return "Бронирование отменено успешно.";
     }
 
     public String acceptBookingRequest(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(
-                        () -> new ResourceNotFoundException("Booking was not found with ID: " + bookingId)
+                        () -> new ResourceNotFoundException("Бронирование не было найдено с айди: "
+                                + bookingId)
                 );
 
         if(!getAuthentication().getId().equals(booking.getProduct().getUser().getId())) {
@@ -255,13 +278,14 @@ public class BookingService {
             calendarRepository.save(entity);
         }
 
-        return "The booking was accepted.";
+        return "Бронирование одобрено успешно.";
     }
 
     public String rejectBookingRequest(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(
-                        () -> new ResourceNotFoundException("Booking was not found with ID: " + bookingId)
+                        () -> new ResourceNotFoundException("Бронирование не было найдено с айди: "
+                                + bookingId)
                 );
 
         if(!getAuthentication().getId().equals(booking.getProduct().getUser().getId())) {
@@ -276,12 +300,13 @@ public class BookingService {
 
         for (Calendar entity : calendar) {
             entity.setBooked(false);
+            entity.setUser(null);
             calendarRepository.save(entity);
         }
 
         bookingRepository.save(booking);
 
-        return "The booking was rejected.";
+        return "Бронирование отказано успешно.";
     }
 
     public User getAuthentication() {

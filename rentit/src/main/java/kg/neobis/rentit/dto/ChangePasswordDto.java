@@ -22,6 +22,6 @@ public class ChangePasswordDto {
     private String oldPassword;
 
     @Schema(description = "Новый пароль", example = "rentit2022", required = true)
-    @Size(min = 8, message = "Password size must be longer than 8!")
+    @Size(min = 8, message = "Пароль должен быть больше 8 символов!")
     private String newPassword;
 }

@@ -19,15 +19,19 @@ public class UserCompleteRegisterDto {
     private Long id;
 
     @Schema(description = "Имя", example = "Джон", required = true)
-    @NotBlank(message = "First name can't be null or empty")
+    @NotBlank(message = "Имя не должно быть пустым")
     private String firstName;
 
     @Schema(description = "Фамилия", example = "Дои", required = true)
-    @NotBlank(message = "Last name can't be null or empty")
+    @NotBlank(message = "Фамилия не должна быть пустой")
     private String lastName;
 
+    @Schema(description = "Отчество", example = "Смит", required = true)
+    @NotBlank(message = "Отчество не должно быть пустым")
+    private String middleName;
+
     @Schema(description = "Номер телефона", example = "+996777777777", required = true)
-    @NotBlank(message = "Phone Number can't be null or empty")
+    @NotBlank(message = "Номер телефона не должен быть пустым")
     private String phoneNumber;
 
     @Schema(description = "Дата рождения", example = "2000-01-01", required = true)

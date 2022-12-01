@@ -63,4 +63,28 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     )
     List<Product> getProductBySearch(String text);
 
+    List<Product> findAllByUserIdOrderByActiveAscCreationTimeDesc(Long userId);
+
+    @Query(
+            value = "SELECT * FROM Product p" +
+                    "INNER JOIN \"user\" u " +
+                    "ON u.id = p.user_id " +
+                    "WHERE u.blocked = false " +
+                    "AND p.category_id = :categoryId " +
+                    "ORDER BY p.title",
+            nativeQuery = true
+    )
+    List<Product> getMapProductsByCategory(Long categoryId);
+
+    @Query(
+            value = "SELECT * FROM Product p" +
+                    "INNER JOIN \"user\" u " +
+                    "ON u.id = p.user_id " +
+                    "WHERE u.blocked = false " +
+                    "AND p.category_id = :categoryId " +
+                    "ORDER BY RANDOM() LIMIT 9",
+            nativeQuery = true
+    )
+    List<Product> getSimilarProductsByCategory(Long categoryId);
+
 }
