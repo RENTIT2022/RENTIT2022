@@ -113,6 +113,13 @@ public class UserService implements UserDetailsService {
         return userDtos;
     }
 
+    public User getById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден!"));
+
+        return user;
+    }
+
     public UserDto getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден!"));
