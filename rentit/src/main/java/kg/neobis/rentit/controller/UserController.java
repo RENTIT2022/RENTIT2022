@@ -98,10 +98,16 @@ public class UserController {
         return ResponseEntity.ok(userService.deleteUserById(id));
     }
 
-    @Operation(summary = "Get user profile")
+    @Operation(summary = "Получение профиля пользователя")
     @GetMapping(value = "/get-profile", produces = "application/json")
     public ResponseEntity<UserProfileDto> getProfile() {
         return ResponseEntity.ok(userService.getProfile());
+    }
+
+    @Operation(summary = "Получение профиля пользователя по айди")
+    @GetMapping(value = "/get-profile-by-id/{userId}", produces = "application/json")
+    public ResponseEntity<UserProfileDto> getProfileById(@PathVariable Long userId) {
+        return ResponseEntity.ok(userService.getProfileById(userId));
     }
 
     @Operation(summary = "Изменение аватарки пользователя.")

@@ -463,6 +463,19 @@ public class UserService implements UserDetailsService {
             throw new ResourceNotFoundException("User is not authenticated");
         }
 
+        return mapToProfileDto(user);
+    }
+
+    public UserProfileDto getProfileById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("User was not found with ID: " + id)
+                );
+
+        return mapToProfileDto(user);
+    }
+
+    public UserProfileDto mapToProfileDto(User user) {
         int rating = 100 - complaintRepository
                 .getComplaintsNumberByAddresseeId(user.getId());
 
